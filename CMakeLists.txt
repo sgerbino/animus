@@ -70,16 +70,24 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_RUNTIME_OUTPUT_DIRECTORY})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_LIBRARY_OUTPUT_DIRECTORY})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_ARCHIVE_OUTPUT_DIRECTORY})
 
-file(GLOB JSON_DIR_RESULT "${CMAKE_SOURCE_DIR}/${PROJECT_DEPS_DIR}/json")
+file(GLOB JSON_DIR_RESULT "${PROJECT_SOURCE_DIR}/${PROJECT_DEPS_DIR}/json/*")
 list(LENGTH JSON_DIR_RESULT JSON_DIR_RESULT_LEN)
-file(GLOB DJINNI_DIR_RESULT "${CMAKE_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni")
+
+file(GLOB DJINNI_DIR_RESULT "${PROJECT_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni/*")
 list(LENGTH DJINNI_DIR_RESULT DJINNI_DIR_RESULT_LEN)
+
 if (JSON_DIR_RESULT_LEN EQUAL 0 OR DJINNI_DIR_RESULT_LEN EQUAL 0)
-   execute_process(COMMAND git submodule update --init --recursive WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+   message("-- Updating git submodules")
+   execute_process(COMMAND git submodule update --init --recursive WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+else()
+   message("-- Found git submodules")
 endif()
 
 if (NOT EXISTS "${CMAKE_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni/src/run")
-   execute_process(COMMAND make -j4 WORKING_DIRECTORY "$CMAKE_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni")
+   message("-- Building djinni")
+   execute_process(COMMAND make -j4 WORKING_DIRECTORY {$PROJECT_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni)
+else()
+   message("-- Found djinni executable")
 endif()
 
 find_package(Json REQUIRED)
