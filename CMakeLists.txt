@@ -58,6 +58,7 @@ set(PROJECT_JAVA_DIR java)
 set(PROJECT_DOCS_DIR docs)
 set(PROJECT_SRC_DIR src)
 set(PROJECT_TEST_DIR test)
+set(PROJECT_CONF_DIR conf)
 
 set(PROJECT_RUNTIME_OUTPUT_DIRECTORY bin)
 set(PROJECT_LIBRARY_OUTPUT_DIRECTORY lib)
@@ -77,24 +78,44 @@ file(GLOB DJINNI_DIR_RESULT "${PROJECT_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni/*"
 list(LENGTH DJINNI_DIR_RESULT DJINNI_DIR_RESULT_LEN)
 
 if (JSON_DIR_RESULT_LEN EQUAL 0 OR DJINNI_DIR_RESULT_LEN EQUAL 0)
-   message("-- Updating git submodules")
+   message("-- Updating dependencies")
    execute_process(COMMAND git submodule update --init --recursive WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 else()
-   message("-- Found git submodules")
+   message("-- Found dependencies")
 endif()
 
 if (NOT EXISTS "${CMAKE_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni/src/run")
-   message("-- Building djinni")
+   message("-- Building dependencies")
    execute_process(COMMAND make -j4 WORKING_DIRECTORY {$PROJECT_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni)
 else()
-   message("-- Found djinni executable")
+   message("-- Dependencies are built")
 endif()
 
 find_package(Json REQUIRED)
 include_directories(${JSON_INCLUDE_DIRS})
-message("-- Json include directories" ${JSON_INCLUDE_DIRS})
+message("-- Json include directories: " ${JSON_INCLUDE_DIRS})
+
 find_package(Djinni REQUIRED)
-message("-- Djinni executable" ${DJINNI_EXECUTABLE})
+message("-- Djinni executable: " ${DJINNI_EXECUTABLE})
+
+add_custom_command(
+   OUTPUT ${PROJECT_SRC_DIR}/interface/api.hpp
+   COMMAND ${DJINNI_EXECUTABLE}
+      --cpp-out ${PROJECT_SRC_DIR}/interface
+      --java-out ${PROJECT_JAVA_DIR}
+      --jni-out ${PROJECT_JNI_DIR}
+      --objc-out ${PROJECT_OBJC_DIR}
+      --objcpp-out ${PROJECT_OBJC_DIR}
+      --objcpp-include-cpp-prefix interface/
+      --jni-include-cpp-prefix interface/
+      --cpp-optional-header "\"<experimental/optional>\""
+      --cpp-optional-template std::experimental::optional
+      --idl conf/mobile++.djinni
+   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+   DEPENDS ${PROJECT_CONF_DIR}/mobile++.djinni
+)
+
+add_custom_target(djinni ALL DEPENDS ${PROJECT_SRC_DIR}/interface/api.hpp)
 
 add_subdirectory(${PROJECT_SRC_DIR})
 

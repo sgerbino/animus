@@ -3,14 +3,14 @@
 #include "json.hpp"
 #include <iostream>
 
-struct api_impl: mobilepp::api {
+struct api_impl: Api {
     bool do_something() {
         return true;
     }
 };
 
 
-std::shared_ptr<mobilepp::api> mobilepp::api::get() {
+std::shared_ptr<Api> Api::get() {
     return std::make_shared<api_impl>();
 }
 
