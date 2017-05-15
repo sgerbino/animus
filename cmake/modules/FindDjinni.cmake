@@ -28,7 +28,7 @@ if(DJINNI_FOUND)
     set(DJINNI_INCLUDE_DIRS ${DJINNI_INCLUDE_DIR})
     find_program(
 	DJINNI_EXECUTABLE
-	run-assume-built
+	run
 	PATHS ${DJINNI_INCLUDE_DIRS})
 endif(DJINNI_FOUND)
 
