@@ -79,14 +79,14 @@ list(LENGTH DJINNI_DIR_RESULT DJINNI_DIR_RESULT_LEN)
 
 if (JSON_DIR_RESULT_LEN EQUAL 0 OR DJINNI_DIR_RESULT_LEN EQUAL 0)
    message("-- Updating dependencies")
-   execute_process(COMMAND git submodule update --init --recursive WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+   execute_process(COMMAND git submodule update --init --recursive WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET)
 else()
    message("-- Found dependencies")
 endif()
 
 if (NOT EXISTS "${CMAKE_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni/src/run")
    message("-- Building dependencies")
-   execute_process(COMMAND make -j4 WORKING_DIRECTORY {$PROJECT_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni)
+   execute_process(COMMAND make -j4 WORKING_DIRECTORY {$PROJECT_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni OUTPUT_QUIET)
 else()
    message("-- Dependencies are built")
 endif()
@@ -98,10 +98,7 @@ message("-- Json include directories: " ${JSON_INCLUDE_DIRS})
 find_package(Djinni REQUIRED)
 message("-- Djinni executable: " ${DJINNI_EXECUTABLE})
 
-set(DJINNI_GENERATED_FILES ${PROJECT_SRC_DIR}/interface/api.hpp ${PROJECT_SRC_DIR}/java/Api.java ${PROJECT_SRC_DIR}/objc/Api+Private.h ${PROJECT_SRC_DIR}/objc/Api+Private.mm ${PROJECT_SRC_DIR}/objc/Api.h)
-add_custom_command(
-   OUTPUT ${DJINNI_GENERATED_FILES}
-   COMMAND ${DJINNI_EXECUTABLE}
+set(DJINNI_COMMAND ${DJINNI_EXECUTABLE}
       --cpp-out ${PROJECT_SRC_DIR}/interface
       --java-out ${PROJECT_JAVA_DIR}
       --jni-out ${PROJECT_JNI_DIR}
@@ -111,7 +108,16 @@ add_custom_command(
       --jni-include-cpp-prefix interface/
       --cpp-optional-header "\"<experimental/optional>\""
       --cpp-optional-template std::experimental::optional
-      --idl conf/mobile++.djinni
+      --idl ${PROJECT_SOURCE_DIR}/conf/mobile++.djinni
+)
+
+execute_process(COMMAND ${DJINNI_COMMAND} --skip-generation true --list-out-files djinni.out OUTPUT_QUIET)
+file(STRINGS ${PROJECT_BINARY_DIR}/djinni.out DJINNI_GENERATED_FILES)
+message("-- Djinni will generate the following files: ${DJINNI_GENERATED_FILES}")
+
+add_custom_command(
+   OUTPUT ${DJINNI_GENERATED_FILES}
+   COMMAND ${DJINNI_COMMAND}
    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
    DEPENDS ${PROJECT_CONF_DIR}/mobile++.djinni
 )
