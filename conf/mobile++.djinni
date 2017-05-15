@@ -1,4 +1,5 @@
 api = interface +c {
     static get(): api;
     do_something(): bool;
+    do_something_else(): bool;
 }

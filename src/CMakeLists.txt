@@ -1,2 +1,2 @@
-add_executable(api api.cpp)
-add_dependencies(api djinni)
+add_library(${PROJECT_NAME} api.cpp)
+add_dependencies(${PROJECT_NAME} djinni)

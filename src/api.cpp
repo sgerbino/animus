@@ -7,6 +7,10 @@ struct api_impl: Api {
     bool do_something() {
         return true;
     }
+
+  bool do_something_else() {
+    return true;
+  }
 };
 
 

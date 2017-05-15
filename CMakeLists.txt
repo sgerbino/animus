@@ -98,8 +98,9 @@ message("-- Json include directories: " ${JSON_INCLUDE_DIRS})
 find_package(Djinni REQUIRED)
 message("-- Djinni executable: " ${DJINNI_EXECUTABLE})
 
+set(DJINNI_GENERATED_FILES ${PROJECT_SRC_DIR}/interface/api.hpp ${PROJECT_SRC_DIR}/java/Api.java ${PROJECT_SRC_DIR}/objc/Api+Private.h ${PROJECT_SRC_DIR}/objc/Api+Private.mm ${PROJECT_SRC_DIR}/objc/Api.h)
 add_custom_command(
-   OUTPUT ${PROJECT_SRC_DIR}/interface/api.hpp
+   OUTPUT ${DJINNI_GENERATED_FILES}
    COMMAND ${DJINNI_EXECUTABLE}
       --cpp-out ${PROJECT_SRC_DIR}/interface
       --java-out ${PROJECT_JAVA_DIR}
@@ -115,7 +116,9 @@ add_custom_command(
    DEPENDS ${PROJECT_CONF_DIR}/mobile++.djinni
 )
 
-add_custom_target(djinni ALL DEPENDS ${PROJECT_SRC_DIR}/interface/api.hpp)
+add_custom_target(djinni ALL DEPENDS ${DJINNI_GENERATED_FILES})
+
+include_directories(${PROJECT_SRC_DIR}/interface)
 
 add_subdirectory(${PROJECT_SRC_DIR})
 

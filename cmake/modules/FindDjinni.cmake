@@ -6,7 +6,7 @@
 #   JSON_FOUND, if false, do not try to link against
 #
 
-set(BUILD_DEPS_DIR ${CMAKE_SOURCE_DIR}/${PROJECT_DEPS_DIR})
+set(BUILD_DEPS_DIR ${PROJECT_SOURCE_DIR}/${PROJECT_DEPS_DIR})
 set(DJINNI_DEPS_DIR djinni)
 
 find_path(
@@ -28,7 +28,7 @@ if(DJINNI_FOUND)
     set(DJINNI_INCLUDE_DIRS ${DJINNI_INCLUDE_DIR})
     find_program(
 	DJINNI_EXECUTABLE
-	run
+	run-assume-built
 	PATHS ${DJINNI_INCLUDE_DIRS})
 endif(DJINNI_FOUND)
 
