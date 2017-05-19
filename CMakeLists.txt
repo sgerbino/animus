@@ -91,11 +91,11 @@ else()
    message("-- Git submodules have already been initialized and updated")
 endif()
 
-if (NOT EXISTS "${CMAKE_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni/src/target/start")
+if (NOT EXISTS "${PROJECT_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni/src/target/start")
    execute_process(COMMAND ${BUILD_DJINNI} WORKING_DIRECTORY {$PROJECT_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni)
 else()
    message("-- Djinni is already built")
-#endif()
+endif()
 
 find_package(Json REQUIRED)
 include_directories(${JSON_INCLUDE_DIRS})
