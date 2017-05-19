@@ -92,7 +92,7 @@ else()
 endif()
 
 if (NOT EXISTS "${CMAKE_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni/src/run")
-   execute_process(COMMAND ${BUILD_DJINNI} WORKING_DIRECTORY {$PROJECT_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni OUTPUT_QUIET)
+   execute_process(COMMAND ${BUILD_DJINNI} WORKING_DIRECTORY {$PROJECT_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni)
 else()
    message("-- Dependencies are built")
 endif()
