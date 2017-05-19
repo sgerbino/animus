@@ -2,7 +2,6 @@
 
 message=$1
 command=$2
-result_message=$3
 
 $command >/dev/null 2>&1 &
 pid=$! # Process Id of the previous running command
@@ -17,4 +16,5 @@ do
   sleep .1
 done
 
-printf "\r\033[K-- ${result_message}\r\n"
+printf "\r\033[K-- ${message}\r\n"
+
