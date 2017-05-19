@@ -77,19 +77,23 @@ find_program(BASH_EXECUTABLE bash)
 
 function(execute_process_with_activity)
    set(options )
-   set(oneValueArgs MESSAGE WORKING_DIRECTORY)
-   set(multiValueArgs COMMAND)
+   set(oneValueArgs MESSAGE COMMAND WORKING_DIRECTORY)
+   set(multiValueArgs  )
    cmake_parse_arguments(ACTIVITY "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
    if (NOT ACTIVITY_MESSAGE)
-      message(FATAL_ERROR "A message muched be provided to execute_process_with_activity()")
+      message(FATAL_ERROR "A message must be provided to execute_process_with_activity()")
    endif()
    if (NOT ACTIVITY_COMMAND)
-      message(FATAL_ERROR "A command muched be provided to execute_process_with_activity()")
+      message(FATAL_ERROR "A command must be provided to execute_process_with_activity()")
    endif()
    if (NOT ACTIVITY_WORKING_DIRECTORY)
-      message(FATAL_ERROR "A working directory muched be provided to execute_process_with_activity()")
+      message(FATAL_ERROR "A working directory must be provided to execute_process_with_activity()")
    endif()
-   set(ACTIVITY_FULL_COMMAND ${BASH_EXECUTABLE} ${PROJECT_SOURCE_DIR}/${PROJECT_SCRIPTS_DIR}/activity_indicator.sh ${ACTIVITY_MESSAGE} ${ACTIVITY_COMMAND})
+
+   list(APPEND ACTIVITY_FULL_COMMAND ${BASH_EXECUTABLE} ${PROJECT_SOURCE_DIR}/${PROJECT_SCRIPTS_DIR}/activity_indicator.sh ${ACTIVITY_MESSAGE})
+   list(APPEND ACTIVITY_FULL_COMMAND ${ACTIVITY_COMMAND})
+
    execute_process(COMMAND ${ACTIVITY_FULL_COMMAND} WORKING_DIRECTORY ${ACTIVITY_WORKING_DIRECTORY})
 endfunction()
 
@@ -101,7 +105,7 @@ list(LENGTH DJINNI_DIR_RESULT DJINNI_DIR_RESULT_LEN)
 
 if (JSON_DIR_RESULT_LEN EQUAL 0 OR DJINNI_DIR_RESULT_LEN EQUAL 0)
    execute_process_with_activity(
-      COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+      COMMAND "${GIT_EXECUTABLE} submodule update --init --recursive"
       MESSAGE "Initializing and updating Git submodules"
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
    )
@@ -111,7 +115,7 @@ endif()
 
 if (NOT IS_DIRECTORY ${PROJECT_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni/src/target)
    execute_process_with_activity(
-      COMMAND ${BASH_EXECUTABLE} build
+      COMMAND "${BASH_EXECUTABLE} build"
       MESSAGE "Building Djinni"
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni/src
    )
