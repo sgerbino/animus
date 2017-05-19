@@ -49,6 +49,7 @@ add_definitions(-DPROJECT_NAME=${PROJECT_NAME} -DPROJECT_VERSION="${PROJECT_VERS
 
 set(PROJECT_CMAKE_CLEAN cmake/clean)
 set(PROJECT_CMAKE_MODULES cmake/modules)
+set(PROJECT_SCRIPTS_DIR scripts)
 set(PROJECT_INSTALL_DIR install)
 set(PROJECT_BUILD_DIR build)
 set(PROJECT_DEPS_DIR deps)
@@ -71,6 +72,13 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_RUNTIME_OUTPUT_DIRECTORY})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_LIBRARY_OUTPUT_DIRECTORY})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_ARCHIVE_OUTPUT_DIRECTORY})
 
+find_program(GIT_EXECUTABLE git)
+find_program(MAKE_EXECUTABLE make)
+find_program(BASH_EXECUTABLE bash)
+
+set(UPDATE_DEPENDENCIES ${BASH_EXECUTABLE} ${PROJECT_SCRIPTS_DIR}/activity_indicator.sh "Updating and initializing Git submodules" "${GIT_EXECUTABLE} submodule update --init --recursive" "Git submodules initialized and updated")
+set(BUILD_DJINNI ${BASH_EXECUTABLE} ${PROJECT_SCRIPTS_DIR}/activity_indicator.sh "Building Djinni" "${MAKE_EXECUTABLE} -j4" "Djinni built")
+
 file(GLOB JSON_DIR_RESULT "${PROJECT_SOURCE_DIR}/${PROJECT_DEPS_DIR}/json/*")
 list(LENGTH JSON_DIR_RESULT JSON_DIR_RESULT_LEN)
 
@@ -78,15 +86,13 @@ file(GLOB DJINNI_DIR_RESULT "${PROJECT_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni/*"
 list(LENGTH DJINNI_DIR_RESULT DJINNI_DIR_RESULT_LEN)
 
 if (JSON_DIR_RESULT_LEN EQUAL 0 OR DJINNI_DIR_RESULT_LEN EQUAL 0)
-   message("-- Updating dependencies")
-   execute_process(COMMAND git submodule update --init --recursive WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET)
+   execute_process(COMMAND ${UPDATE_DEPENDENCIES} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 else()
    message("-- Found dependencies")
 endif()
 
 if (NOT EXISTS "${CMAKE_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni/src/run")
-   message("-- Building dependencies")
-   execute_process(COMMAND make -j4 WORKING_DIRECTORY {$PROJECT_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni OUTPUT_QUIET)
+   execute_process(COMMAND ${BUILD_DJINNI} WORKING_DIRECTORY {$PROJECT_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni OUTPUT_QUIET)
 else()
    message("-- Dependencies are built")
 endif()
