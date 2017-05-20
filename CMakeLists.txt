@@ -131,7 +131,6 @@ endif()
 
 find_package(JNI REQUIRED)
 include_directories(${JNI_INCLUDE_DIRS})
-message("-- JNI found")
 
 find_package(Json REQUIRED)
 include_directories(${JSON_INCLUDE_DIRS})
@@ -165,7 +164,7 @@ add_custom_command(
    DEPENDS ${PROJECT_INTERFACE_DEFINITION}
 )
 
-add_custom_target(djinni ALL DEPENDS ${DJINNI_GENERATED_FILES})
+add_custom_target(djinni DEPENDS ${DJINNI_GENERATED_FILES} SOURCES ${PROJECT_INTERFACE_DEFINITION})
 
 include_directories(${PROJECT_INTERFACE_DIR})
 
