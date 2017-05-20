@@ -49,6 +49,7 @@ add_definitions(-DPROJECT_NAME=${PROJECT_NAME} -DPROJECT_VERSION="${PROJECT_VERS
 
 set(PROJECT_CMAKE_CLEAN cmake/clean)
 set(PROJECT_CMAKE_MODULES cmake/modules)
+set(PROJECT_SCRIPTS_DIR scripts)
 set(PROJECT_INSTALL_DIR install)
 set(PROJECT_BUILD_DIR build)
 set(PROJECT_DEPS_DIR deps)
@@ -71,6 +72,31 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_RUNTIME_OUTPUT_DIRECTORY})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_LIBRARY_OUTPUT_DIRECTORY})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_ARCHIVE_OUTPUT_DIRECTORY})
 
+find_program(GIT_EXECUTABLE git)
+find_program(BASH_EXECUTABLE bash)
+
+function(execute_process_with_activity)
+   set(options )
+   set(oneValueArgs MESSAGE COMMAND WORKING_DIRECTORY)
+   set(multiValueArgs  )
+   cmake_parse_arguments(ACTIVITY "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+   if (NOT ACTIVITY_MESSAGE)
+      message(FATAL_ERROR "A message must be provided to execute_process_with_activity()")
+   endif()
+   if (NOT ACTIVITY_COMMAND)
+      message(FATAL_ERROR "A command must be provided to execute_process_with_activity()")
+   endif()
+   if (NOT ACTIVITY_WORKING_DIRECTORY)
+      message(FATAL_ERROR "A working directory must be provided to execute_process_with_activity()")
+   endif()
+
+   list(APPEND ACTIVITY_FULL_COMMAND ${BASH_EXECUTABLE} ${PROJECT_SOURCE_DIR}/${PROJECT_SCRIPTS_DIR}/activity_indicator.sh ${ACTIVITY_MESSAGE})
+   list(APPEND ACTIVITY_FULL_COMMAND ${ACTIVITY_COMMAND})
+
+   execute_process(COMMAND ${ACTIVITY_FULL_COMMAND} WORKING_DIRECTORY ${ACTIVITY_WORKING_DIRECTORY})
+endfunction()
+
 file(GLOB JSON_DIR_RESULT "${PROJECT_SOURCE_DIR}/${PROJECT_DEPS_DIR}/json/*")
 list(LENGTH JSON_DIR_RESULT JSON_DIR_RESULT_LEN)
 
@@ -78,17 +104,23 @@ file(GLOB DJINNI_DIR_RESULT "${PROJECT_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni/*"
 list(LENGTH DJINNI_DIR_RESULT DJINNI_DIR_RESULT_LEN)
 
 if (JSON_DIR_RESULT_LEN EQUAL 0 OR DJINNI_DIR_RESULT_LEN EQUAL 0)
-   message("-- Updating dependencies")
-   execute_process(COMMAND git submodule update --init --recursive WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_QUIET)
+   execute_process_with_activity(
+      COMMAND "${GIT_EXECUTABLE} submodule update --init --recursive"
+      MESSAGE "Initializing and updating Git submodules"
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+   )
 else()
-   message("-- Found dependencies")
+   message("-- Git submodules have already been initialized and updated")
 endif()
 
-if (NOT EXISTS "${CMAKE_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni/src/run")
-   message("-- Building dependencies")
-   execute_process(COMMAND make -j4 WORKING_DIRECTORY {$PROJECT_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni OUTPUT_QUIET)
+if (NOT IS_DIRECTORY ${PROJECT_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni/src/target)
+   execute_process_with_activity(
+      COMMAND "${BASH_EXECUTABLE} build"
+      MESSAGE "Building Djinni"
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/${PROJECT_DEPS_DIR}/djinni/src
+   )
 else()
-   message("-- Dependencies are built")
+   message("-- Djinni is already built")
 endif()
 
 find_package(Json REQUIRED)
