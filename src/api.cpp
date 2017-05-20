@@ -1,4 +1,4 @@
-#include "interface/api.hpp"
+#include "api.hpp"
 #include <memory>
 #include "json.hpp"
 #include <iostream>

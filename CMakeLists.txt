@@ -1,9 +1,12 @@
-set(PROJECT_NAME "waypoint_core" CACHE STRING "The name of the project")
+set(PROJECT_NAME "core++" CACHE STRING "The name of the project")
 set(PROJECT_DESCRIPTION "A cross compiling cmake project" CACHE STRING "The description of the project")
 set(PROJECT_AUTHOR "Steve Gerbino" CACHE STRING "The project author")
 set(PROJECT_AUTHOR_EMAIL "steve@gerbino.co" CACHE STRING "The project authors email")
 set(PROJECT_YEAR_COPYRIGHT "2017" CACHE STRING "The copyright date")
 set(TARGET_DJINNI_CMAKE ${PROJECT_NAME} CACHE STRING "The cmake target and library name")
+set(DJINNI_WITH_OBC OFF CACHE BOOL "Build Djinni with Objective-C support")
+set(DJINNI_WITH_JNI ON CACHE BOOL "Build Djinni with JNI support")
+
 
 project(${PROJECT_NAME})
 cmake_minimum_required(VERSION 3.0)
@@ -52,13 +55,16 @@ set(PROJECT_CMAKE_MODULES cmake/modules)
 set(PROJECT_INSTALL_DIR install)
 set(PROJECT_BUILD_DIR build)
 set(PROJECT_DEPS_DIR deps)
-set(PROJECT_JNI_DIR jni)
-set(PROJECT_OBJC_DIR objc)
-set(PROJECT_JAVA_DIR java)
 set(PROJECT_DOCS_DIR docs)
 set(PROJECT_SRC_DIR src)
 set(PROJECT_TEST_DIR test)
 set(PROJECT_CONF_DIR conf)
+set(PROJECT_GEN_DIR gen)
+set(PROJECT_INTERFACE_DIR ${PROJECT_GEN_DIR}/interface)
+set(PROJECT_JNI_DIR ${PROJECT_GEN_DIR}/jni)
+set(PROJECT_OBJC_DIR ${PROJECT_GEN_DIR}/objc)
+set(PROJECT_JAVA_DIR ${PROJECT_GEN_DIR}/java)
+set(PROJECT_INTERFACE_DEFINITION ${PROJECT_SOURCE_DIR}/${PROJECT_CONF_DIR}/interface_definition.djinni)
 
 set(PROJECT_RUNTIME_OUTPUT_DIRECTORY bin)
 set(PROJECT_LIBRARY_OUTPUT_DIRECTORY lib)
@@ -91,15 +97,20 @@ else()
    message("-- Dependencies are built")
 endif()
 
+find_package(JNI REQUIRED)
+include_directories(${JNI_INCLUDE_DIRS})
+message("-- JNI found")
+
 find_package(Json REQUIRED)
 include_directories(${JSON_INCLUDE_DIRS})
 message("-- Json include directories: " ${JSON_INCLUDE_DIRS})
 
 find_package(Djinni REQUIRED)
+include_directories(${DJINNI_JNI_INCLUDE_DIR} ${DJINNI_OBJC_INCLUDE_DIR})
 message("-- Djinni executable: " ${DJINNI_EXECUTABLE})
 
 set(DJINNI_COMMAND ${DJINNI_EXECUTABLE}
-      --cpp-out ${PROJECT_SRC_DIR}/interface
+      --cpp-out ${PROJECT_INTERFACE_DIR}
       --java-out ${PROJECT_JAVA_DIR}
       --jni-out ${PROJECT_JNI_DIR}
       --objc-out ${PROJECT_OBJC_DIR}
@@ -108,7 +119,7 @@ set(DJINNI_COMMAND ${DJINNI_EXECUTABLE}
       --jni-include-cpp-prefix interface/
       --cpp-optional-header "\"<experimental/optional>\""
       --cpp-optional-template std::experimental::optional
-      --idl ${PROJECT_SOURCE_DIR}/conf/mobile++.djinni
+      --idl ${PROJECT_INTERFACE_DEFINITION}
 )
 
 execute_process(COMMAND ${DJINNI_COMMAND} --skip-generation true --list-out-files djinni.out OUTPUT_QUIET)
@@ -119,14 +130,17 @@ add_custom_command(
    OUTPUT ${DJINNI_GENERATED_FILES}
    COMMAND ${DJINNI_COMMAND}
    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-   DEPENDS ${PROJECT_CONF_DIR}/mobile++.djinni
+   DEPENDS ${PROJECT_INTERFACE_DEFINITION}
 )
 
 add_custom_target(djinni ALL DEPENDS ${DJINNI_GENERATED_FILES})
 
-include_directories(${PROJECT_SRC_DIR}/interface)
+include_directories(${PROJECT_INTERFACE_DIR})
 
+
+add_subdirectory(${PROJECT_DEPS_DIR}/djinni)
 add_subdirectory(${PROJECT_SRC_DIR})
+add_subdirectory(${PROJECT_GEN_DIR})
 
 if(DOXYGEN_FOUND)
     add_subdirectory(${PROJECT_DOCS_DIR})

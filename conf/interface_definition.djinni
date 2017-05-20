@@ -3,3 +3,4 @@ api = interface +c {
     do_something(): bool;
     do_something_else(): bool;
 }
+
