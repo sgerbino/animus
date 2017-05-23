@@ -4,12 +4,12 @@ set(PROJECT_AUTHOR "Steve Gerbino" CACHE STRING "The project author")
 set(PROJECT_AUTHOR_EMAIL "steve@gerbino.co" CACHE STRING "The project authors email")
 set(PROJECT_YEAR_COPYRIGHT "2017" CACHE STRING "The copyright date")
 set(TARGET_DJINNI_CMAKE ${PROJECT_NAME} CACHE STRING "The cmake target and library name")
-set(DJINNI_WITH_OBC OFF CACHE BOOL "Build Djinni with Objective-C support")
-set(DJINNI_WITH_JNI ON CACHE BOOL "Build Djinni with JNI support")
+set(PROJECT_WITH_OBC OFF CACHE BOOL "Build project with Objective-C support")
+set(PROJECT_WITH_JNI ON CACHE BOOL "Build project with JNI support")
 
-
-project(${PROJECT_NAME})
-cmake_minimum_required(VERSION 3.0)
+cmake_policy(SET CMP0048 NEW)
+project(${PROJECT_NAME} VERSION 1.0.0.0)
+cmake_minimum_required(VERSION 3.6)
 
 if(NOT CMAKE_BUILD_TYPE)
         set(CMAKE_BUILD_TYPE Debug)
@@ -19,10 +19,10 @@ if(NOT LIBRARY_TYPE)
     set(LIBRARY_TYPE "Shared")
 endif(NOT LIBRARY_TYPE)
 
-set(PROJECT_VERSION_MAJOR 0)
-set(PROJECT_VERSION_MINOR 1)
-set(PROJECT_VERSION_PATCH 0)
-set(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
+#set(PROJECT_VERSION_MAJOR 0)
+#set(PROJECT_VERSION_MINOR 1)
+#set(PROJECT_VERSION_PATCH 0)
+#set(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 
 set(PROJECT_BUILD_MESSAGE ${PROJECT_NAME} " v" ${PROJECT_VERSION} " (" ${LIBRARY_TYPE} "." ${CMAKE_BUILD_TYPE} ")")
 set(COPYRIGHT_BUILD_MESSAGE "Copyright (c) " ${PROJECT_YEAR_COPYRIGHT} " " ${PROJECT_AUTHOR}  " <" ${PROJECT_AUTHOR_EMAIL} ">")
@@ -151,11 +151,31 @@ set(DJINNI_COMMAND ${DJINNI_EXECUTABLE}
       --cpp-optional-header "\"<experimental/optional>\""
       --cpp-optional-template std::experimental::optional
       --idl ${PROJECT_INTERFACE_DEFINITION}
+      --objc-type-prefix MPP
 )
 
 execute_process(COMMAND ${DJINNI_COMMAND} --skip-generation true --list-out-files djinni.out OUTPUT_QUIET)
 file(STRINGS ${PROJECT_BINARY_DIR}/djinni.out DJINNI_GENERATED_FILES)
 message("-- Djinni will generate the following files: ${DJINNI_GENERATED_FILES}")
+
+foreach(ITEM ${DJINNI_GENERATED_FILES})
+   get_filename_component(ITEM_DIRECTORY ${ITEM} DIRECTORY)
+   get_filename_component(ITEM_NAME ${ITEM} NAME)
+   if (${ITEM_DIRECTORY} STREQUAL ${PROJECT_JNI_DIR})
+      list(APPEND DJINNI_JNI_FILES ${ITEM_NAME})
+   endif()
+   if (${ITEM_DIRECTORY} STREQUAL ${PROJECT_OBJC_DIR})
+      list(APPEND DJINNI_OBJC_FILES ${ITEM_NAME})
+   endif()
+   if (${ITEM_DIRECTORY} STREQUAL ${PROJECT_JAVA_DIR})
+      list(APPEND DJINNI_JAVA_FILES ${ITEM_NAME})
+   endif()
+   if (${ITEM_DIRECTORY} STREQUAL ${PROJECT_INTERFACE_DIR})
+      list(APPEND DJINNI_INTERFACE_FILES ${ITEM_NAME})
+   endif()
+endforeach()
+
+list(APPEND DJINNI_OUTPUT_FILES ${DJINNI_JNI_FILES} ${DJINNI_OBCJ_FILES} ${DJINNI_JAVA_FILES} ${DJINNI_INTERFACE_FILES})
 
 add_custom_command(
    OUTPUT ${DJINNI_GENERATED_FILES}
@@ -164,11 +184,12 @@ add_custom_command(
    DEPENDS ${PROJECT_INTERFACE_DEFINITION}
 )
 
-add_custom_target(djinni DEPENDS ${DJINNI_GENERATED_FILES} SOURCES ${PROJECT_INTERFACE_DEFINITION})
+add_custom_target(djinni DEPENDS ${DJINNI_OUTPUT_FILES} SOURCES ${PROJECT_INTERFACE_DEFINITION})
 
 include_directories(${PROJECT_INTERFACE_DIR})
 
-
+set(DJINNI_WITH_OBJC ${PROJECT_WITH_OBJC} CACHE BOOL "Build Djinni with Objective-C support")
+set(DJINNI_WITH_JNI ${PROJECT_WITH_JNI} CACHE BOOL "Build Djinni with JNI support")
 add_subdirectory(${PROJECT_DEPS_DIR}/djinni)
 add_subdirectory(${PROJECT_SRC_DIR})
 add_subdirectory(${PROJECT_GEN_DIR})
