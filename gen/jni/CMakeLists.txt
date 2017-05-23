@@ -1,4 +1,0 @@
-set(PROJECT_JNI_LIBRARY ${PROJECT_NAME}-jni)
-add_library(${PROJECT_JNI_LIBRARY} SHARED ${DJINNI_JNI_FILES})
-target_include_directories(${PROJECT_JNI_LIBRARY} PUBLIC ${PROJECT_SOURCE_DIR}/${PROJECT_GEN_DIR})
-add_dependencies(${PROJECT_JNI_LIBRARY} ${PROJECT_NAME} djinni_support_lib)
