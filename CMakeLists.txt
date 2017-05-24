@@ -156,9 +156,9 @@ set(DJINNI_COMMAND ${DJINNI_EXECUTABLE}
 
 execute_process(COMMAND ${DJINNI_COMMAND} --skip-generation true --list-out-files djinni.out OUTPUT_QUIET)
 file(STRINGS ${PROJECT_BINARY_DIR}/djinni.out DJINNI_GENERATED_FILES)
-message("-- Djinni will generate the following files: ${DJINNI_GENERATED_FILES}")
-
+message("-- Djinni will generate the following files: ")
 foreach(ITEM ${DJINNI_GENERATED_FILES})
+   message("--  -> ${ITEM}")
    get_filename_component(ITEM_DIRECTORY ${ITEM} DIRECTORY)
    get_filename_component(ITEM_NAME ${ITEM} NAME)
    if (${ITEM_DIRECTORY} STREQUAL ${PROJECT_JNI_DIR})
