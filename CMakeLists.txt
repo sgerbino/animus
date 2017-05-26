@@ -1,12 +1,18 @@
-set(PROJECT_NAME "core++" CACHE STRING "The name of the project")
+set(PROJECT_NAME "animus" CACHE STRING "The name of the project")
 set(PROJECT_DESCRIPTION "A cross compiling cmake project" CACHE STRING "The description of the project")
 set(PROJECT_AUTHOR "Steve Gerbino" CACHE STRING "The project author")
 set(PROJECT_AUTHOR_EMAIL "steve@gerbino.co" CACHE STRING "The project authors email")
 set(PROJECT_YEAR_COPYRIGHT "2017" CACHE STRING "The copyright date")
 set(TARGET_DJINNI_CMAKE ${PROJECT_NAME} CACHE STRING "The cmake target and library name")
-set(PROJECT_WITH_OBC OFF CACHE BOOL "Build project with Objective-C support")
 set(PROJECT_WITH_JNI ON CACHE BOOL "Build project with JNI support")
+if (${CMAKE_GENERATOR} STREQUAL Xcode)
+   set(PROJECT_WITH_OBJC ON CACHE BOOL "Build project with Objective-C support")
+else()
+   set(PROJECT_WITH_OBJC OFF CACHE BOOL "Build project with Objective-C support")
+endif()
 
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 cmake_policy(SET CMP0048 NEW)
 project(${PROJECT_NAME} VERSION 1.0.0.0)
 cmake_minimum_required(VERSION 3.6)
@@ -18,11 +24,6 @@ endif(NOT CMAKE_BUILD_TYPE)
 if(NOT LIBRARY_TYPE)
     set(LIBRARY_TYPE "Shared")
 endif(NOT LIBRARY_TYPE)
-
-#set(PROJECT_VERSION_MAJOR 0)
-#set(PROJECT_VERSION_MINOR 1)
-#set(PROJECT_VERSION_PATCH 0)
-#set(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 
 set(PROJECT_BUILD_MESSAGE ${PROJECT_NAME} " v" ${PROJECT_VERSION} " (" ${LIBRARY_TYPE} "." ${CMAKE_BUILD_TYPE} ")")
 set(COPYRIGHT_BUILD_MESSAGE "Copyright (c) " ${PROJECT_YEAR_COPYRIGHT} " " ${PROJECT_AUTHOR}  " <" ${PROJECT_AUTHOR_EMAIL} ">")
@@ -158,7 +159,7 @@ execute_process(COMMAND ${DJINNI_COMMAND} --skip-generation true --list-out-file
 file(STRINGS ${PROJECT_BINARY_DIR}/djinni.out DJINNI_GENERATED_FILES)
 message("-- Djinni will generate the following files: ")
 foreach(ITEM ${DJINNI_GENERATED_FILES})
-   message("--  -> ${ITEM}")
+   message("--  `-> ${ITEM}")
    get_filename_component(ITEM_DIRECTORY ${ITEM} DIRECTORY)
    get_filename_component(ITEM_NAME ${ITEM} NAME)
    if (${ITEM_DIRECTORY} STREQUAL ${PROJECT_JNI_DIR})
@@ -194,10 +195,20 @@ add_subdirectory(${PROJECT_DEPS_DIR}/djinni)
 add_subdirectory(${PROJECT_SRC_DIR})
 add_subdirectory(${PROJECT_TEST_DIR})
 
-set(PROJECT_JNI_LIBRARY ${PROJECT_NAME}-jni)
-add_library(${PROJECT_JNI_LIBRARY} SHARED ${DJINNI_JNI_FILES})
-target_include_directories(${PROJECT_JNI_LIBRARY} PUBLIC ${PROJECT_GEN_DIR})
-add_dependencies(${PROJECT_JNI_LIBRARY} ${PROJECT_NAME} djinni_support_lib)
+if (${PROJECT_WITH_JNI})
+  set(PROJECT_JNI_LIBRARY ${PROJECT_NAME}-jni)
+  add_library(${PROJECT_JNI_LIBRARY} SHARED ${DJINNI_JNI_FILES})
+  target_include_directories(${PROJECT_JNI_LIBRARY} PUBLIC ${PROJECT_GEN_DIR})
+  add_dependencies(${PROJECT_JNI_LIBRARY} ${PROJECT_NAME} djinni_support_lib)
+endif()
+
+if (${PROJECT_WITH_OBJC})
+   set(PROJECT_OBJC_LIBRARY ${PROJECT_NAME}-objc)
+   add_library(${PROJECT_OBJC_LIBRARY} SHARED ${DJINNI_OBJC_FILES})
+   target_include_directories(${PROJECT_OBJC_LIBRARY} PUBLIC ${PROJECT_GEN_DIR})
+   set_property (TARGET ${PROJECT_OBJC_LIBRARY} APPEND_STRING PROPERTY COMPILE_FLAGS "-fobjc-arc")
+   add_dependencies(${PROJECT_OBJC_LIBRARY} ${PROJECT_NAME} djinni_support_lib)
+endif()
 
 #
 # Keep your stuff and go further away, foolish.
@@ -220,7 +231,6 @@ set(CPACK_PACKAGING_INSTALL_DIRECTORY "${PROJECT_NAME}-${CMake_VERSION_MAJOR}.${
 
 include(CPack)
 
-message("--")
 message("-- " ${PROJECT_BUILD_MESSAGE})
 message("-- " ${COPYRIGHT_BUILD_MESSAGE})
-message("--")
+
