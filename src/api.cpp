@@ -3,7 +3,7 @@
 #include "json.hpp"
 #include <iostream>
 
-struct api_impl: Api {
+struct api_impl: animus::api {
     bool do_something() {
         return true;
     }
@@ -18,7 +18,7 @@ struct api_impl: Api {
 };
 
 
-std::shared_ptr<Api> Api::get() {
+std::shared_ptr<animus::api> animus::api::get() {
     return std::make_shared<api_impl>();
 }
 

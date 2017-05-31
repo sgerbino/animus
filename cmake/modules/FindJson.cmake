@@ -6,7 +6,7 @@
 #   JSON_FOUND, if false, do not try to link against
 #
 
-set(BUILD_DEPS_DIR ${PROJECT_SOURCE_DIR}/${PROJECT_DEPS_DIR})
+set(BUILD_DEPS_DIR ${PROJECT_SOURCE_DIR}/${ANIMUS_DEPS_DIR})
 set(JSON_DEPS_DIR json)
 
 find_path(
