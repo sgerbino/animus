@@ -1,5 +1,0 @@
-api = interface +c {
-    static get(): api;
-    do_something(): bool;
-    do_great_things(): bool;
-}

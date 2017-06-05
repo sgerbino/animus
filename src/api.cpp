@@ -1,35 +1,28 @@
 #include "api.hpp"
-#include <memory>
-#include "json.hpp"
-#include <iostream>
+#include "event_loop.hpp"
+#include "thread_launcher.hpp"
 
-struct api_impl: animus::api {
-    bool do_something() {
-        return true;
-    }
-    
-    bool do_something_else() {
-        return true;
-    }
-    
-    bool do_great_things() {
-        return true;
-    }
-};
+using namespace animus;
+using namespace std;
 
-
-std::shared_ptr<animus::api> animus::api::get() {
-    return std::make_shared<api_impl>();
+shared_ptr<animus_generated::api> animus_generated::api::create_api(
+                                                                    const string &root_path,
+                                                                    const shared_ptr<animus_generated::event_loop> &ui_thread,
+                                                                    const shared_ptr<animus_generated::http> &http_impl,
+                                                                    const shared_ptr<animus_generated::thread_launcher> &launcher) {
+    const auto ui_runner = make_shared<animus::event_loop>(ui_thread);
+    const auto bg_runner = make_shared<animus::animus_loop>(launcher);
+    return make_shared<animus::api>(root_path, ui_runner, bg_runner, http_impl);
 }
 
-using json = nlohmann::json;
-
-int main(int argc, char **argv)
+api::api(
+         const string& root_path,
+         const shared_ptr<task_runner>& ui_runner,
+         const shared_ptr<task_runner>& bg_runner,
+         const shared_ptr<animus_generated::http>& http_client
+         ) :
+ui_thread {ui_runner},
+bg_thread {bg_runner},
+bg_http {http_client, bg_thread}
 {
-    json j = {
-        {"pi", 3.141}
-    };
-    j["three"] = 3;
-    std::cout << j.dump(4) << std::endl;
-    return 0;
 }
