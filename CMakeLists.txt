@@ -3,7 +3,7 @@ set(ANIMUS_PROJECT_DESCRIPTION "A cross compiling cmake project" CACHE STRING "T
 set(ANIMUS_PROJECT_AUTHOR "Steve Gerbino" CACHE STRING "The project author")
 set(ANIMUS_PROJECT_AUTHOR_EMAIL "steve@gerbino.co" CACHE STRING "The project authors email")
 set(ANIMUS_PROJECT_YEAR_COPYRIGHT "2017" CACHE STRING "The copyright date")
-#set(TARGET_DJINNI_CMAKE ${PROJECT_NAME} CACHE STRING "The cmake target and library name")
+set(ANIMUS_PROJECT_IDENTIFIER "io.github.animus" CACHE STRING "The project identifier")
 set(ANIMUS_WITH_JNI ON CACHE BOOL "Build project with JNI support")
 if (${CMAKE_GENERATOR} STREQUAL Xcode)
    set(ANIMUS_WITH_OBJC ON CACHE BOOL "Build project with Objective-C support")
@@ -46,7 +46,7 @@ if(NOT LIBRARY_TYPE)
     set(LIBRARY_TYPE "Shared")
 endif(NOT LIBRARY_TYPE)
 
-set(ANIMUS_BUILD_MESSAGE ${ANIMUS_PROJECT_NAME} " v" ${PROJECT_VERSION} " (" ${LIBRARY_TYPE} "." ${CMAKE_BUILD_TYPE} ")")
+set(ANIMUS_BUILD_MESSAGE ${ANIMUS_PROJECT_NAME} " v" ${PROJECT_VERSION} " (" ${LIBRARY_TYPE} "::" ${CMAKE_BUILD_TYPE} ")")
 set(ANIMUS_COPYRIGHT_BUILD_MESSAGE "Copyright (c) " ${ANIMUS_PROJECT_YEAR_COPYRIGHT} " " ${ANIMUS_PROJECT_AUTHOR}  " <" ${ANIMUS_PROJECT_AUTHOR_EMAIL} ">")
 
 #
@@ -223,7 +223,14 @@ add_custom_command(
    DEPENDS ${ANIMUS_INTERFACE_DEFINITION}
 )
 
-add_custom_target(djinni DEPENDS ${DJINNI_OUTPUT_FILES} SOURCES ${ANIMUS_INTERFACE_DEFINITION})
+add_custom_target(djinni
+   DEPENDS ${DJINNI_OUTPUT_FILES}
+   SOURCES
+      ${ANIMUS_INTERFACE_DEFINITION}
+      ${ANIMUS_DJINNI_DIR}/thread_launcher.djinni
+      ${ANIMUS_DJINNI_DIR}/event_loop.djinni
+      ${ANIMUS_DJINNI_DIR}/http.djinni
+)
 
 include_directories(${ANIMUS_INTERFACE_DIR})
 
