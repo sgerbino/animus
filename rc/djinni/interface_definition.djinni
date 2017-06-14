@@ -1,0 +1,7 @@
+@import "thread_launcher.djinni"
+@import "event_loop.djinni"
+@import "http.djinni"
+
+api = interface +c {
+   static create_api(root_path: string, ui_thread: event_loop, http_impl: http, launcher: thread_launcher): api;
+}
