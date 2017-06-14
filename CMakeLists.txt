@@ -118,7 +118,7 @@ function(execute_process_with_activity)
       message(FATAL_ERROR "A working directory must be provided to execute_process_with_activity()")
    endif()
 
-   list(APPEND ACTIVITY_FULL_COMMAND ${BASH_EXECUTABLE} ${PROJECT_SOURCE_DIR}/${PROJECT_SCRIPTS_DIR}/activity_indicator.sh ${ACTIVITY_MESSAGE})
+   list(APPEND ACTIVITY_FULL_COMMAND ${BASH_EXECUTABLE} ${PROJECT_SOURCE_DIR}/${ANIMUS_SCRIPTS_DIR}/activity_indicator.sh ${ACTIVITY_MESSAGE})
    list(APPEND ACTIVITY_FULL_COMMAND ${ACTIVITY_COMMAND})
 
    execute_process(COMMAND ${ACTIVITY_FULL_COMMAND} WORKING_DIRECTORY ${ACTIVITY_WORKING_DIRECTORY})
