@@ -87,6 +87,7 @@ set(ANIMUS_JNI_DIR ${ANIMUS_GEN_DIR}/jni)
 set(ANIMUS_OBJC_DIR ${ANIMUS_GEN_DIR}/objc)
 set(ANIMUS_JAVA_DIR ${ANIMUS_GEN_DIR}/java)
 set(ANIMUS_INTERFACE_DEFINITION ${PROJECT_SOURCE_DIR}/${ANIMUS_DJINNI_DIR}/interface_definition.djinni)
+set(ANIMUS_OBJC_UMBRELLA_HEADER ${ANIMUS_OBJC_DIR}/${ANIMUS_PROJECT_NAME}.h)
 
 set(PROJECT_RUNTIME_OUTPUT_DIRECTORY bin)
 set(PROJECT_LIBRARY_OUTPUT_DIRECTORY lib)
@@ -172,7 +173,7 @@ set(DJINNI_COMMAND ${DJINNI_EXECUTABLE}
       --objcpp-out ${ANIMUS_OBJC_DIR}
       --objcpp-include-cpp-prefix interface/
       --jni-include-cpp-prefix interface/
-      --cpp-optional-header "\"<experimental/optional>\""
+      --cpp-optional-header "<experimental/optional>"
       --cpp-optional-template std::experimental::optional
       --cpp-namespace ${ANIMUS_CPP_NAMESPACE}
       --java-package ${ANIMUS_JAVA_PACKAGE}
@@ -194,6 +195,7 @@ set(DJINNI_COMMAND ${DJINNI_EXECUTABLE}
 )
 
 execute_process(COMMAND ${DJINNI_COMMAND} --skip-generation true --list-out-files djinni.out OUTPUT_QUIET)
+#execute_process(COMMAND ${DJINNI_COMMAND} --list-out-files djinni.out OUTPUT_QUIET)
 file(STRINGS ${PROJECT_BINARY_DIR}/djinni.out DJINNI_GENERATED_FILES)
 message("-- Djinni will generate the following files: ")
 foreach(ITEM ${DJINNI_GENERATED_FILES})
@@ -205,6 +207,10 @@ foreach(ITEM ${DJINNI_GENERATED_FILES})
    endif()
    if (${ITEM_DIRECTORY} STREQUAL ${ANIMUS_OBJC_DIR})
       list(APPEND DJINNI_OBJC_FILES ${ITEM_DIRECTORY}/${ITEM_NAME})
+      if (${ITEM_NAME} MATCHES "\\.h$" AND NOT ${ITEM_NAME} MATCHES "\\+Private\\.h$")
+         list(APPEND DJINNI_OBJC_HEADER_FILES ${ITEM_NAME})
+         list(APPEND DJINNI_OBJC_HEADER_FILES_WITH_PATH ${ITEM_DIRECTORY}/${ITEM_NAME})
+      endif()
    endif()
    if (${ITEM_DIRECTORY} STREQUAL ${ANIMUS_JAVA_DIR})
       list(APPEND DJINNI_JAVA_FILES ${ITEM_DIRECTORY}/${ITEM_NAME})
@@ -212,6 +218,14 @@ foreach(ITEM ${DJINNI_GENERATED_FILES})
    if (${ITEM_DIRECTORY} STREQUAL ${ANIMUS_INTERFACE_DIR})
       list(APPEND DJINNI_INTERFACE_FILES ${ITEM_DIRECTORY}/${ITEM_NAME})
    endif()
+endforeach()
+
+message("-- Generating Objective-C umbrella header")
+message("--  `-> ${ANIMUS_OBJC_UMBRELLA_HEADER}")
+file(REMOVE ${ANIMUS_OBJC_UMBRELLA_HEADER})
+foreach(ITEM IN LISTS DJINNI_OBJC_HEADER_FILES)
+message("--    `-> Including ${ITEM}")
+   file(APPEND ${ANIMUS_OBJC_UMBRELLA_HEADER} "#import \"${ITEM}\"\n")
 endforeach()
 
 list(APPEND DJINNI_OUTPUT_FILES ${DJINNI_JNI_FILES} ${DJINNI_OBCJ_FILES} ${DJINNI_JAVA_FILES} ${DJINNI_INTERFACE_FILES})
@@ -250,11 +264,25 @@ endif()
 
 if (${ANIMUS_WITH_OBJC})
    set(ANIMUS_OBJC_LIBRARY ${ANIMUS_BINARY_NAME}-objc)
-   add_library(${ANIMUS_OBJC_LIBRARY} SHARED ${DJINNI_OBJC_FILES})
+   set_source_files_properties(${ANIMUS_OBJC_UMBRELLA_HEADER} ${DJINNI_OBJC_FILES} PROPERTIES GENERATED TRUE)
+   add_library(${ANIMUS_OBJC_LIBRARY} SHARED ${DJINNI_OBJC_FILES} ${ANIMUS_OBJC_UMBRELLA_HEADER})
    target_include_directories(${ANIMUS_OBJC_LIBRARY} PUBLIC ${ANIMUS_GEN_DIR})
    set_property (TARGET ${ANIMUS_OBJC_LIBRARY} APPEND_STRING PROPERTY COMPILE_FLAGS "-fobjc-arc")
-   add_dependencies(${ANIMUS_OBJC_LIBRARY} ${ANIMUS_BINARY_NAME} djinni_support_lib)
-   set_target_properties(${ANIMUS_OBJC_LIBRARY} PROPERTIES PROJECT_LABEL "Djinni Objective-C/C++")
+   target_link_libraries(${ANIMUS_OBJC_LIBRARY} ${ANIMUS_BINARY_NAME} djinni_support_lib)
+   set_target_properties(${ANIMUS_OBJC_LIBRARY} PROPERTIES
+      PROJECT_LABEL "Djinni Objective-C/C++"
+      OUTPUT_NAME ${ANIMUS_PROJECT_NAME}
+   )
+   list(APPEND DJINNI_OBJC_HEADER_FILES_WITH_PATH ${ANIMUS_OBJC_DIR}/${ANIMUS_PROJECT_NAME}.h)
+   set_target_properties(${ANIMUS_OBJC_LIBRARY} PROPERTIES
+      FRAMEWORK TRUE
+      FRAMEWORK_VERSION A
+      MACOSX_FRAMEWORK_IDENTIFIER ${ANIMUS_PROJECT_IDENTIFIER}
+      VERSION ${PROJECT_VERSION}
+      SOVERSION ${PROJECT_VERSION}
+      PUBLIC_HEADER "${DJINNI_OBJC_HEADER_FILES_WITH_PATH}"
+      XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
+   )
 endif()
 
 set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
