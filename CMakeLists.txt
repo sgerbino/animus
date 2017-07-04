@@ -17,7 +17,7 @@ endif()
 set(ANIMUS_CPP_NAMESPACE "animus_generated" CACHE STRING "Namespace of the generated C++")
 set(ANIMUS_JAVA_PACKAGE "io.github.animus" CACHE STRING "Namespace of the generated Java package")
 set(ANIMUS_JNI_NAMESPACE "animus_jni" CACHE STRING "Namespace of the generated JNI C++")
-set(ANIMUS_OBJC_TYPE_PREFIX "ANM" CACHE STRING "Prefix for generated Objective-C code")
+set(ANIMUS_OBJC_TYPE_PREFIX "" CACHE STRING "Prefix for generated Objective-C code")
 set(ANIMUS_OBJCPP_NAMESPACE "animus_objc" CACHE STRING "Namespace of the generated Objective-C")
 set(ANIMUS_IDENT_CPP_ENUM "foo_bar" CACHE STRING "C++ enumeration style")
 set(ANIMUS_IDENT_CPP_FIELD "foo_bar" CACHE STRING "C++ field style")
@@ -39,11 +39,11 @@ project(${ANIMUS_PROJECT_NAME} VERSION 1.0.0.0)
 cmake_minimum_required(VERSION 3.6)
 
 if(NOT CMAKE_BUILD_TYPE)
-        set(CMAKE_BUILD_TYPE Debug)
+   set(CMAKE_BUILD_TYPE Debug)
 endif(NOT CMAKE_BUILD_TYPE)
 
 if(NOT LIBRARY_TYPE)
-    set(LIBRARY_TYPE "Shared")
+   set(LIBRARY_TYPE "Shared")
 endif(NOT LIBRARY_TYPE)
 
 set(ANIMUS_BUILD_MESSAGE ${ANIMUS_PROJECT_NAME} " v" ${PROJECT_VERSION} " (" ${LIBRARY_TYPE} "::" ${CMAKE_BUILD_TYPE} ")")
@@ -61,10 +61,6 @@ endif(APPLE)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g -DDEBUG")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Os -DRELEASE")
 
 add_definitions(-DPROJECT_NAME=${ANIMUS_PROJECT_NAME} -DPROJECT_VERSION="${PROJECT_VERSION}")
 
@@ -173,12 +169,12 @@ set(DJINNI_COMMAND ${DJINNI_EXECUTABLE}
       --objcpp-out ${ANIMUS_OBJC_DIR}
       --objcpp-include-cpp-prefix interface/
       --jni-include-cpp-prefix interface/
-      --cpp-optional-header "<experimental/optional>"
+      --cpp-optional-header "\"<experimental/optional>\""
       --cpp-optional-template std::experimental::optional
       --cpp-namespace ${ANIMUS_CPP_NAMESPACE}
       --java-package ${ANIMUS_JAVA_PACKAGE}
       --jni-namespace ${ANIMUS_JNI_NAMESPACE}
-      --objc-type-prefix ${ANIMUS_OBJC_TYPE_PREFIX}
+#      --objc-type-prefix "${ANIMUS_OBJC_TYPE_PREFIX}"
       --objcpp-namespace ${ANIMUS_OBJCPP_NAMESPACE}
       --ident-cpp-enum ${ANIMUS_IDENT_CPP_ENUM}
       --ident-cpp-field ${ANIMUS_IDENT_CPP_FIELD}
@@ -195,7 +191,7 @@ set(DJINNI_COMMAND ${DJINNI_EXECUTABLE}
 )
 
 execute_process(COMMAND ${DJINNI_COMMAND} --skip-generation true --list-out-files djinni.out OUTPUT_QUIET)
-#execute_process(COMMAND ${DJINNI_COMMAND} --list-out-files djinni.out OUTPUT_QUIET)
+
 file(STRINGS ${PROJECT_BINARY_DIR}/djinni.out DJINNI_GENERATED_FILES)
 message("-- Djinni will generate the following files: ")
 foreach(ITEM ${DJINNI_GENERATED_FILES})
@@ -220,11 +216,10 @@ foreach(ITEM ${DJINNI_GENERATED_FILES})
    endif()
 endforeach()
 
-message("-- Generating Objective-C umbrella header")
-message("--  `-> ${ANIMUS_OBJC_UMBRELLA_HEADER}")
+message("-- Generating Objective-C umbrella header (${ANIMUS_OBJC_UMBRELLA_HEADER})")
 file(REMOVE ${ANIMUS_OBJC_UMBRELLA_HEADER})
 foreach(ITEM IN LISTS DJINNI_OBJC_HEADER_FILES)
-message("--    `-> Including ${ITEM}")
+message("--  `-> Including ${ITEM}")
    file(APPEND ${ANIMUS_OBJC_UMBRELLA_HEADER} "#import \"${ITEM}\"\n")
 endforeach()
 
@@ -246,10 +241,9 @@ add_custom_target(djinni
       ${ANIMUS_DJINNI_DIR}/http.djinni
 )
 
-include_directories(${ANIMUS_INTERFACE_DIR})
-
 set(DJINNI_WITH_OBJC ${ANIMUS_WITH_OBJC} CACHE BOOL "Build Djinni with Objective-C support")
 set(DJINNI_WITH_JNI ${ANIMUS_WITH_JNI} CACHE BOOL "Build Djinni with JNI support")
+set(DJINNI_STATIC_LIB ON CACHE BOOL "Build Djinni support library as a static library instead of dynamic")
 add_subdirectory(${ANIMUS_DEPS_DIR}/djinni)
 add_subdirectory(${ANIMUS_SRC_DIR})
 add_subdirectory(${ANIMUS_TEST_DIR})
@@ -258,21 +252,17 @@ if (${ANIMUS_WITH_JNI})
    set(ANIMUS_JNI_LIBRARY ${ANIMUS_BINARY_NAME}-jni)
    add_library(${ANIMUS_JNI_LIBRARY} SHARED ${DJINNI_JNI_FILES})
    target_include_directories(${ANIMUS_JNI_LIBRARY} PUBLIC ${ANIMUS_GEN_DIR})
-   add_dependencies(${ANIMUS_JNI_LIBRARY} ${ANIMUS_BINARY_NAME} djinni_support_lib)
+   target_link_libraries(${ANIMUS_JNI_LIBRARY} ${ANIMUS_BINARY_NAME} djinni_support_lib)
    set_target_properties(${ANIMUS_JNI_LIBRARY} PROPERTIES PROJECT_LABEL "Djinni JNI")
 endif()
 
 if (${ANIMUS_WITH_OBJC})
    set(ANIMUS_OBJC_LIBRARY ${ANIMUS_BINARY_NAME}-objc)
-   set_source_files_properties(${ANIMUS_OBJC_UMBRELLA_HEADER} ${DJINNI_OBJC_FILES} PROPERTIES GENERATED TRUE)
-   add_library(${ANIMUS_OBJC_LIBRARY} SHARED ${DJINNI_OBJC_FILES} ${ANIMUS_OBJC_UMBRELLA_HEADER})
+   list(APPEND ANIMUS_OBJC_FILES ${ANIMUS_OBJC_UMBRELLA_HEADER} ${DJINNI_OBJC_FILES})
+   set_source_files_properties(${ANIMUS_OBJC_FILES} PROPERTIES GENERATED TRUE)
+   add_library(${ANIMUS_OBJC_LIBRARY} SHARED ${ANIMUS_OBJC_FILES})
    target_include_directories(${ANIMUS_OBJC_LIBRARY} PUBLIC ${ANIMUS_GEN_DIR})
-   set_property (TARGET ${ANIMUS_OBJC_LIBRARY} APPEND_STRING PROPERTY COMPILE_FLAGS "-fobjc-arc")
    target_link_libraries(${ANIMUS_OBJC_LIBRARY} ${ANIMUS_BINARY_NAME} djinni_support_lib)
-   set_target_properties(${ANIMUS_OBJC_LIBRARY} PROPERTIES
-      PROJECT_LABEL "Djinni Objective-C/C++"
-      OUTPUT_NAME ${ANIMUS_PROJECT_NAME}
-   )
    list(APPEND DJINNI_OBJC_HEADER_FILES_WITH_PATH ${ANIMUS_OBJC_DIR}/${ANIMUS_PROJECT_NAME}.h)
    set_target_properties(${ANIMUS_OBJC_LIBRARY} PROPERTIES
       FRAMEWORK TRUE
@@ -282,6 +272,9 @@ if (${ANIMUS_WITH_OBJC})
       SOVERSION ${PROJECT_VERSION}
       PUBLIC_HEADER "${DJINNI_OBJC_HEADER_FILES_WITH_PATH}"
       XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
+      XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC YES
+      PROJECT_LABEL "Djinni Objective-C/C++"
+      OUTPUT_NAME ${ANIMUS_PROJECT_NAME}
    )
 endif()
 
