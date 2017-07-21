@@ -1,7 +1,7 @@
 #pragma once
 #include "EventLoop.h"
 
-@interface EventLoopObjc : NSObject <EventLoop>
+@interface AppleEventLoop : NSObject <EventLoop>
 
 - (void)post:(AsyncTask *)task;
 

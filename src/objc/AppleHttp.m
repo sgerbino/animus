@@ -1,8 +1,8 @@
 #include <Foundation/Foundation.h>
-#include "HttpObjc.h"
+#include "AppleHttp.h"
 #include "HttpCallback.h"
 
-@implementation HttpObjc
+@implementation AppleHttp
 
 - (void) get:(NSString *)urlString callback:(HttpCallback *)callback {
   NSURL *URL = [NSURL URLWithString:urlString];

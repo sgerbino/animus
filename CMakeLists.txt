@@ -221,6 +221,11 @@ endforeach()
 
 message("-- Generating Objective-C umbrella header (${ANIMUS_OBJC_UMBRELLA_HEADER})")
 file(REMOVE ${ANIMUS_OBJC_UMBRELLA_HEADER})
+list(APPEND
+   DJINNI_OBJC_HEADER_FILES
+      AppleEventLoop.h
+      AppleHttp.h
+      AppleThreadLauncher.h)
 foreach(ITEM IN LISTS DJINNI_OBJC_HEADER_FILES)
 message("--  `-> Including ${ITEM}")
    file(APPEND ${ANIMUS_OBJC_UMBRELLA_HEADER} "#import \"${ITEM}\"\n")
@@ -261,12 +266,12 @@ endif()
 
 if (${ANIMUS_WITH_OBJC})
    set(ANIMUS_OBJC_IMPLEMENTATION_FILES
-   ${ANIMUS_OBJC_SRC_DIR}/EventLoopObjc.h
-   ${ANIMUS_OBJC_SRC_DIR}/EventLoopObjc.m
-   ${ANIMUS_OBJC_SRC_DIR}/HttpObjc.h
-   ${ANIMUS_OBJC_SRC_DIR}/HttpObjc.m
-   ${ANIMUS_OBJC_SRC_DIR}/ThreadLauncherObjc.h
-   ${ANIMUS_OBJC_SRC_DIR}/ThreadLauncherObjc.m)
+   ${ANIMUS_OBJC_SRC_DIR}/AppleEventLoop.h
+   ${ANIMUS_OBJC_SRC_DIR}/AppleEventLoop.m
+   ${ANIMUS_OBJC_SRC_DIR}/AppleHttp.h
+   ${ANIMUS_OBJC_SRC_DIR}/AppleHttp.m
+   ${ANIMUS_OBJC_SRC_DIR}/AppleThreadLauncher.h
+   ${ANIMUS_OBJC_SRC_DIR}/AppleThreadLauncher.m)
 
    set(ANIMUS_OBJC_LIBRARY ${ANIMUS_BINARY_NAME}-objc)
    list(APPEND ANIMUS_OBJC_FILES ${ANIMUS_OBJC_UMBRELLA_HEADER} ${DJINNI_OBJC_FILES})
@@ -274,7 +279,12 @@ if (${ANIMUS_WITH_OBJC})
    add_library(${ANIMUS_OBJC_LIBRARY} SHARED ${ANIMUS_OBJC_FILES} ${ANIMUS_OBJC_IMPLEMENTATION_FILES})
    target_include_directories(${ANIMUS_OBJC_LIBRARY} PUBLIC ${ANIMUS_GEN_DIR}/objc)
    target_link_libraries(${ANIMUS_OBJC_LIBRARY} ${ANIMUS_BINARY_NAME} djinni_support_lib)
-   list(APPEND DJINNI_OBJC_HEADER_FILES_WITH_PATH ${ANIMUS_OBJC_DIR}/${ANIMUS_PROJECT_NAME}.h)
+   list(APPEND
+      DJINNI_OBJC_HEADER_FILES_WITH_PATH
+         ${ANIMUS_OBJC_DIR}/${ANIMUS_PROJECT_NAME}.h
+         ${ANIMUS_OBJC_SRC_DIR}/AppleEventLoop.h
+         ${ANIMUS_OBJC_SRC_DIR}/AppleHttp.h
+         ${ANIMUS_OBJC_SRC_DIR}/AppleThreadLauncher.h)
    set_target_properties(${ANIMUS_OBJC_LIBRARY} PROPERTIES
       FRAMEWORK TRUE
       FRAMEWORK_VERSION A

@@ -1,8 +1,8 @@
 #include <Foundation/Foundation.h>
-#include "ThreadLauncherObjc.h"
+#include "AppleThreadLauncher.h"
 #include "AsyncTask.h"
 
-@implementation ThreadLauncherObjc
+@implementation AppleThreadLauncher
 
 - (void)startThread:(NSString *)name runFn:(AsyncTask *)runFn {
   NSThread *thread = [[NSThread alloc] initWithTarget:runFn selector:@selector(execute) object:nil];
