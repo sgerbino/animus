@@ -36,9 +36,9 @@ After building the project on macOS, a framework will be generated. Including th
 
 ```
 var api = Api.createApi("Animus",
-uiThread: AppleEventLoop(),
-httpImpl: AppleHttp(),
-launcher: AppleThreadLauncher())
+   uiThread: AppleEventLoop(),
+   httpImpl: AppleHttp(),
+   launcher: AppleThreadLauncher())
 ```
 *macOS Swift Example*
 
