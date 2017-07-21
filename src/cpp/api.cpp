@@ -1,6 +1,7 @@
 #include "api.hpp"
 #include "event_loop.hpp"
 #include "thread_launcher.hpp"
+#include <iostream>
 
 using namespace animus;
 using namespace std;

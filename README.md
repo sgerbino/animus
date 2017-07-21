@@ -11,6 +11,7 @@
 
 - [Summary](#summary)
 - [Usage](#usage)
+- [Examples](#examples)
 - [License](#license)
 
 ## Summary
@@ -26,6 +27,20 @@ cmake .. -G Xcode
 ## Usage
 
 Define your core application interface in ```$PROJECT_SOURCE_DIR/rc/djinni/interface_definition.djinni``` and implement your interface in C++ in ```$PROJECT_SOURCE_DIR/src```.
+
+## Examples
+
+### Apple
+
+After building the project on macOS, a framework will be generated. Including this in a project will allow you to use your core API from Objective-C and/or Swift.
+
+```
+var api = Api.createApi("Animus",
+   uiThread: AppleEventLoop(),
+   httpImpl: AppleHttp(),
+   launcher: AppleThreadLauncher())
+```
+*macOS Swift Example*
 
 ## License
 

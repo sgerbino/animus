@@ -4,6 +4,12 @@ using namespace std;
 
 namespace animus {
     
+    task_function::task_function(function<void()> run) : func {std::move(run)} {}
+    
+    void task_function::execute() {
+        func();
+    }
+    
     event_loop::event_loop(shared_ptr<animus_generated::event_loop> loop) : loop {std::move(loop)} {}
     
     void event_loop::post(const task_runner::task & task) {
