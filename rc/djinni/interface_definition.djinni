@@ -3,5 +3,5 @@
 @import "http.djinni"
 
 api = interface +c {
-   static create_api(root_path: string, ui_thread: event_loop, http_impl: http, launcher: thread_launcher): api;
+   static create_api(main_event_loop: event_loop, http_client: http, thread_launcher: thread_launcher): api;
 }
