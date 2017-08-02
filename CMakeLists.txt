@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.6)
+
 set(ANIMUS_PROJECT_NAME "Animus" CACHE STRING "The name of the project")
 set(ANIMUS_PROJECT_DESCRIPTION "A cross compiling cmake project" CACHE STRING "The description of the project")
 set(ANIMUS_PROJECT_AUTHOR "Steve Gerbino" CACHE STRING "The project author")
@@ -5,15 +7,6 @@ set(ANIMUS_PROJECT_AUTHOR_EMAIL "steve@gerbino.co" CACHE STRING "The project aut
 set(ANIMUS_PROJECT_YEAR_COPYRIGHT "2017" CACHE STRING "The copyright date")
 set(ANIMUS_PROJECT_IDENTIFIER "io.github.animus" CACHE STRING "The project identifier")
 set(ANIMUS_WITH_JNI ON CACHE BOOL "Build project with JNI support")
-if (${CMAKE_GENERATOR} STREQUAL Xcode)
-   set(ANIMUS_WITH_OBJC ON CACHE BOOL "Build project with Objective-C support")
-else()
-   set(ANIMUS_WITH_OBJC OFF CACHE BOOL "Build project with Objective-C support")
-endif()
-
-#
-# Djinni style configurations
-#
 set(ANIMUS_CPP_NAMESPACE "animus_generated" CACHE STRING "Namespace of the generated C++")
 set(ANIMUS_JAVA_PACKAGE "io.github.animus" CACHE STRING "Namespace of the generated Java package")
 set(ANIMUS_JNI_NAMESPACE "animus_jni" CACHE STRING "Namespace of the generated JNI C++")
@@ -30,43 +23,11 @@ set(ANIMUS_IDENT_CPP_TYPE "foo_bar" CACHE STRING "C++ type style")
 set(ANIMUS_IDENT_JAVA_FIELD "mFooBar" CACHE STRING "Java field style")
 set(ANIMUS_IDENT_JNI_CLASS "NativeFooBar" CACHE STRING "JNI class style")
 set(ANIMUS_IDENT_JNI_FILE "native_foo_bar" CACHE STRING "JNI file style")
-
-string(TOLOWER ${ANIMUS_PROJECT_NAME} ANIMUS_BINARY_NAME)
-
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-cmake_policy(SET CMP0048 NEW)
-project(${ANIMUS_PROJECT_NAME} VERSION 1.0.0.0)
-cmake_minimum_required(VERSION 3.6)
-
-if(NOT CMAKE_BUILD_TYPE)
-   set(CMAKE_BUILD_TYPE Debug)
-endif(NOT CMAKE_BUILD_TYPE)
-
-if(NOT LIBRARY_TYPE)
-   set(LIBRARY_TYPE "Shared")
-endif(NOT LIBRARY_TYPE)
-
-set(ANIMUS_BUILD_MESSAGE ${ANIMUS_PROJECT_NAME} " v" ${PROJECT_VERSION} " (" ${LIBRARY_TYPE} "::" ${CMAKE_BUILD_TYPE} ")")
-set(ANIMUS_COPYRIGHT_BUILD_MESSAGE "Copyright (c) " ${ANIMUS_PROJECT_YEAR_COPYRIGHT} " " ${ANIMUS_PROJECT_AUTHOR}  " <" ${ANIMUS_PROJECT_AUTHOR_EMAIL} ">")
-
-#
-# Compile stuff
-#
-
-if(APPLE)
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-undefined,dynamic_lookup")
-else(APPLE)
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--export-dynamic")
-endif(APPLE)
-
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-add_definitions(-DPROJECT_NAME=${ANIMUS_PROJECT_NAME} -DPROJECT_VERSION="${PROJECT_VERSION}")
-
-#
-# CMake configuration
-#
+if (${CMAKE_GENERATOR} STREQUAL Xcode)
+   set(ANIMUS_WITH_OBJC ON CACHE BOOL "Build project with Objective-C support")
+else()
+   set(ANIMUS_WITH_OBJC OFF CACHE BOOL "Build project with Objective-C support")
+endif()
 
 set(ANIMUS_CMAKE_INCLUDE cmake/include)
 set(ANIMUS_CMAKE_MODULES cmake/modules)
@@ -94,16 +55,14 @@ set(PROJECT_ARCHIVE_OUTPUT_DIRECTORY lib/static)
 set(PROJECT_INCLUDE_OUTPUT_DIRECTORY include)
 set(PROJECT_SHARE_OUTPUT_DIRECTORY share)
 
-set(CMAKE_MODULE_PATH
-      ${CMAKE_MODULE_PATH}
-      ${CMAKE_SOURCE_DIR}/${ANIMUS_CMAKE_MODULES}
-      ${CMAKE_SOURCE_DIR}/${ANIMUS_CMAKE_INCLUDE})
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/${ANIMUS_CMAKE_MODULES} ${CMAKE_SOURCE_DIR}/${ANIMUS_CMAKE_INCLUDE})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_RUNTIME_OUTPUT_DIRECTORY})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_LIBRARY_OUTPUT_DIRECTORY})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_ARCHIVE_OUTPUT_DIRECTORY})
 
 include(AnimusUtilities)
 
+animus_bootstrap()
 animus_git_initialization()
 animus_build_dependencies()
 
@@ -238,6 +197,5 @@ set(CPACK_PACKAGING_INSTALL_DIRECTORY "${PROJECT_NAME}-${CMake_VERSION_MAJOR}.${
 
 include(CPack)
 
-message("-- " ${ANIMUS_BUILD_MESSAGE})
-message("-- " ${ANIMUS_COPYRIGHT_BUILD_MESSAGE})
-
+message("-- " ${ANIMUS_PROJECT_NAME} " v" ${PROJECT_VERSION} " (" ${LIBRARY_TYPE} "::" ${CMAKE_BUILD_TYPE} ")")
+message("-- Copyright (c) " ${ANIMUS_PROJECT_YEAR_COPYRIGHT} " " ${ANIMUS_PROJECT_AUTHOR}  " <" ${ANIMUS_PROJECT_AUTHOR_EMAIL} ">")

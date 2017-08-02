@@ -94,3 +94,30 @@ macro(animus_generate_objc_umbrella_header)
       file(APPEND ${ANIMUS_OBJC_UMBRELLA_HEADER} "#import \"${ITEM}\"\n")
    endforeach()
 endmacro()
+
+macro(animus_bootstrap)
+   string(TOLOWER ${ANIMUS_PROJECT_NAME} ANIMUS_BINARY_NAME)
+
+   set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+   cmake_policy(SET CMP0048 NEW)
+   project(${ANIMUS_PROJECT_NAME} VERSION 1.0.0.0)
+
+   if(NOT CMAKE_BUILD_TYPE)
+      set(CMAKE_BUILD_TYPE Debug)
+   endif(NOT CMAKE_BUILD_TYPE)
+
+   if(NOT LIBRARY_TYPE)
+      set(LIBRARY_TYPE "Shared")
+   endif(NOT LIBRARY_TYPE)
+
+   if(APPLE)
+      set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-undefined,dynamic_lookup")
+   else(APPLE)
+      set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--export-dynamic")
+   endif(APPLE)
+
+   set(CMAKE_CXX_STANDARD 14)
+   set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+   add_definitions(-DPROJECT_NAME=${ANIMUS_PROJECT_NAME} -DPROJECT_VERSION="${PROJECT_VERSION}")
+endmacro()
