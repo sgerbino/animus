@@ -5,4 +5,8 @@ http_callback = interface +c {
 
 http = interface +o +j {
     get(url: string, callback: http_callback);
+    post(url: string, data: string, callback: http_callback);
+    put(url: string, data: string, callback: http_callback);
+    patch(url: string, data: string, callback: http_callback);
+    del(url: string, callback: http_callback);
 }

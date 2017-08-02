@@ -1,6 +1,7 @@
 #include "api.hpp"
 #include "event_loop.hpp"
 #include "thread_launcher.hpp"
+#include "json.hpp"
 #include <iostream>
 
 using namespace animus;
@@ -24,14 +25,4 @@ api::api(
         daemon_dispatcher {bg_runner},
         http_client {http_impl, daemon_dispatcher}
 {
-    http_client.get("https://jsonplaceholder.typicode.com/posts", [ui = user_interface_dispatcher] (http_response resp) {
-        if (resp.error) {
-            return;
-        }
-        
-        std::cout << resp.http_code << std::endl;
-        std::cout << resp.data << std::endl;
-        std::cout << std::this_thread::get_id() << " bg thread" << std::endl;
-        ui->post([](){ std::cout << std::this_thread::get_id() << " ui thread" << std::endl; });
-    });
 }
