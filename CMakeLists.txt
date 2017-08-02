@@ -68,7 +68,7 @@ add_definitions(-DPROJECT_NAME=${ANIMUS_PROJECT_NAME} -DPROJECT_VERSION="${PROJE
 # CMake configuration
 #
 
-set(ANIMUS_CMAKE_CLEAN cmake/clean)
+set(ANIMUS_CMAKE_INCLUDE cmake/include)
 set(ANIMUS_CMAKE_MODULES cmake/modules)
 set(ANIMUS_SCRIPTS_DIR scripts)
 set(ANIMUS_INSTALL_DIR install)
@@ -94,61 +94,18 @@ set(PROJECT_ARCHIVE_OUTPUT_DIRECTORY lib/static)
 set(PROJECT_INCLUDE_OUTPUT_DIRECTORY include)
 set(PROJECT_SHARE_OUTPUT_DIRECTORY share)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/${ANIMUS_CMAKE_MODULES})
+set(CMAKE_MODULE_PATH
+      ${CMAKE_MODULE_PATH}
+      ${CMAKE_SOURCE_DIR}/${ANIMUS_CMAKE_MODULES}
+      ${CMAKE_SOURCE_DIR}/${ANIMUS_CMAKE_INCLUDE})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_RUNTIME_OUTPUT_DIRECTORY})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_LIBRARY_OUTPUT_DIRECTORY})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_ARCHIVE_OUTPUT_DIRECTORY})
 
-find_program(GIT_EXECUTABLE git)
-find_program(BASH_EXECUTABLE bash)
+include(AnimusUtilities)
 
-function(execute_process_with_activity)
-   set(options )
-   set(oneValueArgs MESSAGE COMMAND WORKING_DIRECTORY)
-   set(multiValueArgs  )
-   cmake_parse_arguments(ACTIVITY "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-
-   if (NOT ACTIVITY_MESSAGE)
-      message(FATAL_ERROR "A message must be provided to execute_process_with_activity()")
-   endif()
-   if (NOT ACTIVITY_COMMAND)
-      message(FATAL_ERROR "A command must be provided to execute_process_with_activity()")
-   endif()
-   if (NOT ACTIVITY_WORKING_DIRECTORY)
-      message(FATAL_ERROR "A working directory must be provided to execute_process_with_activity()")
-   endif()
-
-   list(APPEND ACTIVITY_FULL_COMMAND ${BASH_EXECUTABLE} ${PROJECT_SOURCE_DIR}/${ANIMUS_SCRIPTS_DIR}/activity_indicator.sh ${ACTIVITY_MESSAGE})
-   list(APPEND ACTIVITY_FULL_COMMAND ${ACTIVITY_COMMAND})
-
-   execute_process(COMMAND ${ACTIVITY_FULL_COMMAND} WORKING_DIRECTORY ${ACTIVITY_WORKING_DIRECTORY})
-endfunction()
-
-file(GLOB JSON_DIR_RESULT "${PROJECT_SOURCE_DIR}/${ANIMUS_DEPS_DIR}/json/*")
-list(LENGTH JSON_DIR_RESULT JSON_DIR_RESULT_LEN)
-
-file(GLOB DJINNI_DIR_RESULT "${PROJECT_SOURCE_DIR}/${ANIMUS_DEPS_DIR}/djinni/*")
-list(LENGTH DJINNI_DIR_RESULT DJINNI_DIR_RESULT_LEN)
-
-if (JSON_DIR_RESULT_LEN EQUAL 0 OR DJINNI_DIR_RESULT_LEN EQUAL 0)
-   execute_process_with_activity(
-      COMMAND "${GIT_EXECUTABLE} submodule update --init --recursive"
-      MESSAGE "Initializing and updating Git submodules"
-      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-   )
-else()
-   message("-- Git submodules have already been initialized and updated")
-endif()
-
-if (NOT IS_DIRECTORY ${PROJECT_SOURCE_DIR}/${ANIMUS_DEPS_DIR}/djinni/src/target)
-   execute_process_with_activity(
-      COMMAND "${BASH_EXECUTABLE} build"
-      MESSAGE "Building Djinni"
-      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/${ANIMUS_DEPS_DIR}/djinni/src
-   )
-else()
-   message("-- Djinni is already built")
-endif()
+animus_git_initialization()
+animus_build_dependencies()
 
 find_package(JNI REQUIRED)
 include_directories(${JNI_INCLUDE_DIRS})
@@ -193,43 +150,8 @@ set(DJINNI_COMMAND ${DJINNI_EXECUTABLE}
       --idl ${ANIMUS_INTERFACE_DEFINITION}
 )
 
-execute_process(COMMAND ${DJINNI_COMMAND} --skip-generation true --list-out-files djinni.out OUTPUT_QUIET)
-
-file(STRINGS ${PROJECT_BINARY_DIR}/djinni.out DJINNI_GENERATED_FILES)
-message("-- Djinni will generate the following files: ")
-foreach(ITEM ${DJINNI_GENERATED_FILES})
-   message("--  `-> ${ITEM}")
-   get_filename_component(ITEM_DIRECTORY ${ITEM} DIRECTORY)
-   get_filename_component(ITEM_NAME ${ITEM} NAME)
-   if (${ITEM_DIRECTORY} STREQUAL ${ANIMUS_JNI_DIR})
-      list(APPEND DJINNI_JNI_FILES ${ITEM_DIRECTORY}/${ITEM_NAME})
-   endif()
-   if (${ITEM_DIRECTORY} STREQUAL ${ANIMUS_OBJC_DIR})
-      list(APPEND DJINNI_OBJC_FILES ${ITEM_DIRECTORY}/${ITEM_NAME})
-      if (${ITEM_NAME} MATCHES "\\.h$" AND NOT ${ITEM_NAME} MATCHES "\\+Private\\.h$")
-         list(APPEND DJINNI_OBJC_HEADER_FILES ${ITEM_NAME})
-         list(APPEND DJINNI_OBJC_HEADER_FILES_WITH_PATH ${ITEM_DIRECTORY}/${ITEM_NAME})
-      endif()
-   endif()
-   if (${ITEM_DIRECTORY} STREQUAL ${ANIMUS_JAVA_DIR})
-      list(APPEND DJINNI_JAVA_FILES ${ITEM_DIRECTORY}/${ITEM_NAME})
-   endif()
-   if (${ITEM_DIRECTORY} STREQUAL ${ANIMUS_INTERFACE_DIR})
-      list(APPEND DJINNI_INTERFACE_FILES ${ITEM_DIRECTORY}/${ITEM_NAME})
-   endif()
-endforeach()
-
-message("-- Generating Objective-C umbrella header (${ANIMUS_OBJC_UMBRELLA_HEADER})")
-file(REMOVE ${ANIMUS_OBJC_UMBRELLA_HEADER})
-list(APPEND
-   DJINNI_OBJC_HEADER_FILES
-      AppleEventLoop.h
-      AppleHttp.h
-      AppleThreadLauncher.h)
-foreach(ITEM IN LISTS DJINNI_OBJC_HEADER_FILES)
-message("--  `-> Including ${ITEM}")
-   file(APPEND ${ANIMUS_OBJC_UMBRELLA_HEADER} "#import \"${ITEM}\"\n")
-endforeach()
+animus_get_djinni_output_files()
+animus_generate_objc_umbrella_header()
 
 list(APPEND DJINNI_OUTPUT_FILES ${DJINNI_JNI_FILES} ${DJINNI_OBCJ_FILES} ${DJINNI_JAVA_FILES} ${DJINNI_INTERFACE_FILES})
 
