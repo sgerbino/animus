@@ -14,6 +14,26 @@ namespace animus {
         http_impl->get(url, make_shared<http::request>(std::move(callback), callback_thread) );
     }
     
+    void
+    http::post(const string& url, const string& data, function<void(http_response)> callback) {
+        http_impl->post(url, data, make_shared<http::request>(std::move(callback), callback_thread) );
+    }
+    
+    void
+    http::put(const string& url, const string& data, function<void(http_response)> callback) {
+        http_impl->put(url, data, make_shared<http::request>(std::move(callback), callback_thread) );
+    }
+    
+    void
+    http::patch(const string& url, const string& data, function<void(http_response)> callback) {
+        http_impl->patch(url, data, make_shared<http::request>(std::move(callback), callback_thread) );
+    }
+    
+    void
+    http::del(const string& url, function<void(http_response)> callback) {
+        http_impl->del(url, make_shared<http::request>(std::move(callback), callback_thread) );
+    }
+    
     http::request::request(function<void(http_response)> cb, const shared_ptr<task_runner> & on_thread)
     : callback_thread {on_thread}
     , callback {std::move(cb)} {}

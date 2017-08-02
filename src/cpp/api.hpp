@@ -17,14 +17,13 @@ namespace animus {
     class api: public animus_generated::api {
     public:
         api(
-            const std::string& root_path,
             const std::shared_ptr<task_runner>& ui_runner,
             const std::shared_ptr<task_runner>& bg_runner,
             const std::shared_ptr<animus_generated::http>& http_client
             );
     private:
-        const std::shared_ptr<task_runner> ui_thread;
-        const std::shared_ptr<task_runner> bg_thread;
-        http bg_http;
+        const std::shared_ptr<task_runner> user_interface_dispatcher;
+        const std::shared_ptr<task_runner> daemon_dispatcher;
+        http http_client;
     };
 }

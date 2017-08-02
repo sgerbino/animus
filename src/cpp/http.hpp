@@ -15,6 +15,10 @@ namespace animus {
     public:
         http(std::shared_ptr<animus_generated::http> http_impl, const std::shared_ptr<task_runner> & runner);
         void get(const std::string& url, std::function<void(http_response)>);
+        void post(const std::string& url, const std::string& data, std::function<void(http_response)>);
+        void put(const std::string& url, const std::string& data, std::function<void(http_response)>);
+        void patch(const std::string& url, const std::string& data, std::function<void(http_response)>);
+        void del(const std::string& url, std::function<void(http_response)>);
     private:
         class request final : public animus_generated::http_callback {
         public:

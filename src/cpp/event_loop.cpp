@@ -20,7 +20,7 @@ namespace animus {
         auto task = make_shared<task_function>([this](){
             run();
         });
-        launcher->start_thread(string{"background_event_loop"}, task);
+        launcher->start_thread(string{"daemon_dispatcher"}, task);
     }
     
     animus_loop::~animus_loop() {
