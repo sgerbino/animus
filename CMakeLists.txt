@@ -36,7 +36,7 @@ string(TOLOWER ${ANIMUS_PROJECT_NAME} ANIMUS_BINARY_NAME)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 cmake_policy(SET CMP0048 NEW)
 project(${ANIMUS_PROJECT_NAME} VERSION 1.0.0.0)
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.0)
 
 if(NOT CMAKE_BUILD_TYPE)
    set(CMAKE_BUILD_TYPE Debug)
