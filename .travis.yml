@@ -1,0 +1,32 @@
+language: cpp
+
+os:
+  - linux
+  - osx
+
+compiler:
+  - clang
+  - gcc
+
+env:
+  - CMAKE_BUILD_TYPE=RELEASE
+  - CMAKE_BUILD_TYPE=DEBUG
+
+matrix:
+  exclude:
+    - os: osx
+      compiler: gcc
+
+before_install:
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get update -qq; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update; fi
+  
+install:
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install -qq valgrind; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install valgrind; fi
+
+before_script:
+  - cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+
+script:
+  - cmake --build . --config ${CMAKE_BUILD_TYPE}
