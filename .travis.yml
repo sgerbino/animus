@@ -1,0 +1,19 @@
+language: cpp
+os:
+- osx
+compiler:
+- clang
+env:
+- CMAKE_BUILD_TYPE=RELEASE
+- CMAKE_BUILD_TYPE=DEBUG
+before_install:
+- if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update; fi
+install:
+- if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install valgrind; fi
+before_script:
+- cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -G Xcode
+script:
+- cmake --build . --config ${CMAKE_BUILD_TYPE}
+notifications:
+  slack:
+    secure: opR/b3K1RBl2P1TXzV5JbL5uQA2CVUX+tEPbk+JxtXAQkCK3rk0CazYDSG75cEI58+fjAuCss37cMoFJnWytgYM6mQywF263bGQSg03M3HND3RzW5nx5VZ8Kk3vEM7VfKg9FhEZxkaSxUkFcZpE1cWE0T8BZigogUiVkovbEF0sYXS4xJt5kOWJtKIL2OoCNtIPsKPLAhp76Uykcn8o+/eblB1KpGjVjMa+XsI16no3FW96eFtr212fVK0gTNwDVoWWssULOzDgKZdjXwj4AwJj1LA1QtbU88exRD2x0fEqS4MVgL0U1M8I/s+At6liBZk0pY2HbfAQTmwvSyYEswhyswjhNg45C3YuX9Wvib6cuzl72kAkMcrl8/gS5MaLsfi/4av6tyaIzwmxCdW8g13m5MYaFx8JuLtK2LaLwdNR+pMmZTAJPzRd/QxdHqyQg19nKmmWsxWAXqhR6ARwdX3mN/SrB78wl4NP2X9fwFZ0ccuxvMi+TU6yoLBav5DLuS4FSfvxPVxWzt4RzxXK1hBdxLlbp82wp+T7vOQyydSXHAw1nivBohfRupVNTqvwmeG/sFS3jFyvQRPV7qj6YODaGfOu3aYfgY4zOQpshlFejm4jb/3sGVX70j0djftnkvC14+EDlDnbyuI14hCNP1hIaPa0Fi9b5hsr5TDHCUZg=
