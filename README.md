@@ -30,7 +30,7 @@ Define your core application interface in ```$PROJECT_SOURCE_DIR/rc/djinni/inter
 
 ### Android
 
-To use an animus based project in Android Studio, open your Android project ````build.gradle``` and add the following snippets to the necessary sections.
+To use an animus based project in Android Studio, open your Android project ```build.gradle``` and add the following snippets to the necessary sections.
 
 ```
 android {
