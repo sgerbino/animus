@@ -47,7 +47,7 @@ macro(animus_add_djinni_targets)
 endmacro()
 
 macro(animus_get_djinni_output_files)
-   execute_process(COMMAND ${DJINNI_COMMAND} --skip-generation true --list-out-files djinni.out OUTPUT_QUIET)
+   execute_process(COMMAND ${DJINNI_COMMAND} --skip-generation true --list-out-files ${CMAKE_CURRENT_BINARY_DIR}/djinni.out OUTPUT_QUIET)
 
    file(STRINGS ${PROJECT_BINARY_DIR}/djinni.out DJINNI_GENERATED_FILES)
    message("-- Djinni will generate the following files: ")

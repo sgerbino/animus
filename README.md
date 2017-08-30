@@ -28,6 +28,28 @@ cmake .. -G Xcode
 
 Define your core application interface in ```$PROJECT_SOURCE_DIR/rc/djinni/interface_definition.djinni``` and implement your interface in C++ in ```$PROJECT_SOURCE_DIR/src/cpp```.
 
+### Android
+
+To use an animus based project in Android Studio, open your Android project ````build.gradle``` and add the following snippets to the necessary sections.
+
+```
+android {
+    defaultConfig {
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++14 -fexceptions"
+                arguments "-DANDROID_STL=c++_static"
+            }
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path "deps/animus/CMakeLists.txt"
+        }
+    }
+}
+```
+
 ## Examples
 
 ### Apple
