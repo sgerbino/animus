@@ -26,7 +26,8 @@ macro(animus_add_objc)
          XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
          XCODE_ATTRIBUTE_CODE_SIGN_REQUIRED NO
          XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC YES
-         PROJECT_LABEL "Djinni Objective-C/C++"
+         XCODE_ATTRIBUTE_DEFINES_MODULE YES
+         PROJECT_LABEL "Objective-C/C++"
          OUTPUT_NAME ${ANIMUS_PROJECT_NAME})
    endif()
 endmacro()

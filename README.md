@@ -59,7 +59,9 @@ android {
 After building the project on macOS, a framework will be generated. Including this in a project will allow you to use your core API from Objective-C and/or Swift.
 
 ```
-var api = Api.createApi(uiThread: AppleEventLoop(), httpImpl: AppleHttp(), launcher: AppleThreadLauncher())
+import Animus
+...
+var api = Api.createApi(AppleEventLoop(), httpClient: AppleHttp(), threadLauncher: AppleThreadLauncher())
 ```
 *macOS Swift Example*
 

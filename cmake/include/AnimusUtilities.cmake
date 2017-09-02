@@ -77,7 +77,7 @@ macro(animus_add_subdirectories)
    add_subdirectory(${ANIMUS_SRC_DIR})
 endmacro()
 
-macro(animus_build_message)
+macro(animus_message)
    message("-- " ${ANIMUS_PROJECT_NAME} " v" ${PROJECT_VERSION} " [" ${CMAKE_BUILD_TYPE} "]")
    message("-- Copyright © " ${ANIMUS_PROJECT_YEAR_COPYRIGHT} " " ${ANIMUS_PROJECT_AUTHOR}  " <" ${ANIMUS_PROJECT_AUTHOR_EMAIL} ">")
 endmacro()
