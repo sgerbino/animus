@@ -3,12 +3,17 @@ macro(animus_setup_djinni_command)
    set(DJINNI_WITH_JNI ${ANIMUS_WITH_JNI} CACHE BOOL "Build Djinni with JNI support")
    set(DJINNI_STATIC_LIB ON CACHE BOOL "Build Djinni support library as a static library instead of dynamic")
    add_subdirectory(${ANIMUS_DEPS_DIR}/djinni)
-   set(DJINNI_COMMAND ${DJINNI_RUN_PATH}
-      --cpp-out ${ANIMUS_INTERFACE_DIR}
-      --java-out ${ANIMUS_JAVA_DIR}
-      --jni-out ${ANIMUS_JNI_DIR}
-      --objc-out ${ANIMUS_OBJC_DIR}
-      --objcpp-out ${ANIMUS_OBJC_DIR}
+   list(APPEND DJINNI_COMMAND ${DJINNI_RUN_PATH} --cpp-out ${ANIMUS_INTERFACE_DIR})
+   if (DJINNI_WITH_JNI)
+      list(APPEND DJINNI_COMMAND --java-out ${ANIMUS_JAVA_DIR} --jni-out ${ANIMUS_JNI_DIR})
+   endif()
+   if (DJINNI_WITH_OBJC)
+      list(APPEND DJINNI_COMMAND --objc-out ${ANIMUS_OBJC_DIR} --objcpp-out ${ANIMUS_OBJC_DIR})
+   endif()
+   if (ANIMUS_OBJC_TYPE_PREFIX)
+      list(APPEND DJINNI_COMMAND --objc-type-prefix "${ANIMUS_OBJC_TYPE_PREFIX}")
+   endif()
+   list(APPEND DJINNI_COMMAND
       --objcpp-include-cpp-prefix interface/
       --jni-include-cpp-prefix interface/
       --cpp-optional-header "\"<experimental/optional>\""
@@ -16,7 +21,6 @@ macro(animus_setup_djinni_command)
       --cpp-namespace ${ANIMUS_CPP_NAMESPACE}
       --java-package ${ANIMUS_JAVA_PACKAGE}
       --jni-namespace ${ANIMUS_JNI_NAMESPACE}
-#      --objc-type-prefix "${ANIMUS_OBJC_TYPE_PREFIX}"
       --objcpp-namespace ${ANIMUS_OBJCPP_NAMESPACE}
       --ident-cpp-enum ${ANIMUS_IDENT_CPP_ENUM}
       --ident-cpp-field ${ANIMUS_IDENT_CPP_FIELD}
