@@ -1,8 +1,8 @@
 # Animus
 
-[![FreeBSD License](https://img.shields.io/:license-freebsd-red.svg)](https://github.com/sgerbino/table/blob/master/COPYING.txt)
+[![FreeBSD License](https://img.shields.io/:license-freebsd-red.svg)](https://github.com/sgerbino/animus/blob/master/LICENSE)
 [![Build Status](https://travis-ci.org/sgerbino/animus.svg?branch=master)](https://travis-ci.org/sgerbino/animus)
-<!-- 
+<!--
  [![Build Status](https://ci.appveyor.com/api/projects/status/g719foxpitcnas2s/branch/master?svg=true)](https://ci.appveyor.com/project/sgerbino/table)
  [![Coverity Status](https://scan.coverity.com/projects/7249/badge.svg)](https://scan.coverity.com/projects/sgerbino-table)
 -->
@@ -16,9 +16,11 @@
 
 ## Summary
 
-Animus is a template CMake project that utilizes Djinni to generate Objective-C and Java bindings for modern C++. This is particularly useful for developing cross-platform mobile applications with common application logic.
+Animus is a template CMake project that utilizes Djinni to generate Swift, Objective-C and Java bindings for modern C++. This is particularly useful for developing cross-platform mobile applications with common application logic.
 
 ```bash
+git clone https://github.com/sgerbino/animus.git
+git submodule update --init --recursive
 mkdir build
 cd build
 cmake .. -G Xcode
@@ -57,7 +59,9 @@ android {
 After building the project on macOS, a framework will be generated. Including this in a project will allow you to use your core API from Objective-C and/or Swift.
 
 ```
-var api = Api.createApi(uiThread: AppleEventLoop(), httpImpl: AppleHttp(), launcher: AppleThreadLauncher())
+import Animus
+...
+var api = Api.createApi(AppleEventLoop(), httpClient: AppleHttp(), threadLauncher: AppleThreadLauncher())
 ```
 *macOS Swift Example*
 
@@ -65,4 +69,4 @@ var api = Api.createApi(uiThread: AppleEventLoop(), httpImpl: AppleHttp(), launc
 
 This project uses the "FreeBSD License" or "Simplified BSD License" making it
 compatible with both commercial software licenses and the GNU/GPL. For more
-information see [LICENSE](https://github.com/sgerbino/table/blob/master/LICENSE).
+information see [LICENSE](https://github.com/sgerbino/animus/blob/master/LICENSE).

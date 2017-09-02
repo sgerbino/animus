@@ -1,5 +1,9 @@
 macro(animus_setup_djinni_command)
-   set(DJINNI_COMMAND ${DJINNI_EXECUTABLE}
+   set(DJINNI_WITH_OBJC ${ANIMUS_WITH_OBJC} CACHE BOOL "Build Djinni with Objective-C support")
+   set(DJINNI_WITH_JNI ${ANIMUS_WITH_JNI} CACHE BOOL "Build Djinni with JNI support")
+   set(DJINNI_STATIC_LIB ON CACHE BOOL "Build Djinni support library as a static library instead of dynamic")
+   add_subdirectory(${ANIMUS_DEPS_DIR}/djinni)
+   set(DJINNI_COMMAND ${DJINNI_RUN_PATH}
       --cpp-out ${ANIMUS_INTERFACE_DIR}
       --java-out ${ANIMUS_JAVA_DIR}
       --jni-out ${ANIMUS_JNI_DIR}
