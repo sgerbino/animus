@@ -34,6 +34,9 @@ set(OBJC_SOURCES
       AppleHttp.m
       AppleThreadLauncher.m)
 
-set(JAVA_SOURCES )
+set(JAVA_SOURCES
+      AndroidEventLoop.java
+      AndroidHttp.java
+      AndroidThreadLauncher.java)
 
 include(cmake/include/Animus.cmake)
