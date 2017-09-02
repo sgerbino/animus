@@ -5,8 +5,6 @@ include(cmake/include/AnimusObjc.cmake)
 include(cmake/include/AnimusCPack.cmake)
 
 animus_bootstrap()
-animus_git_initialization()
-animus_build_dependencies()
 animus_setup_djinni_command()
 animus_get_djinni_output_files()
 animus_generate_objc_umbrella_header()
