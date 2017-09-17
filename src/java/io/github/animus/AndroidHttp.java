@@ -23,13 +23,25 @@ public class AndroidHttp extends Http {
         BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>();
         mExecutor = new ThreadPoolExecutor(1, 20, 60, TimeUnit.SECONDS, workQueue);
     }
-    public void get(final String urlString, final HttpCallback callback) {
+
+    public void sendRequest(final String urlString, final String method, String data, final HttpCallback callback) {
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
                 try {
                     URL url = new URL(urlString);
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod(method);
+                    if (method.equals("POST") || method.equals("PATCH") || method.equals("PUT")) {
+                      if (data != null && !data.isEmpty()) {
+                        byte[] postData = data.getBytes(StandardCharsets.UTF_8);
+                        conn.setRequestProperty("Content-Type", "application/json");
+                        conn.setRequestProperty("Content-Length", Integer.toString(postData.length));
+                        try( DataOutputStream wr = new DataOutputStream( conn.getOutputStream())) {
+                          wr.write(postData);
+                        }
+                      }
+                    }
                     int httpCode = conn.getResponseCode();
                     BufferedInputStream iStream = new BufferedInputStream(conn.getInputStream());
                     String response = getString(iStream, "UTF-8");
@@ -42,6 +54,27 @@ public class AndroidHttp extends Http {
             }
         });
     }
+
+    public void get(final String urlString, final HttpCallback callback) {
+        sendRequest(urlString, "GET", null, callback);
+    }
+
+    public void put(final String urlString, String data, final HttpCallback callback) {
+        sendRequest(urlString, "PUT", data, callback);
+    }
+
+    public void patch(final String urlString, String data, final HttpCallback callback) {
+        sendRequest(urlString, "PATCH", data, callback);
+    }
+
+    public void post(final String urlString, String data, final HttpCallback callback) {
+        sendRequest(urlString, "POST", data, callback);
+    }
+
+    public void del(final String urlString, final HttpCallback callback) {
+        sendRequest(urlString, "DELETE", null, callback);
+    }
+
     private static String getString(InputStream stream, String charsetName) throws IOException
     {
         int n = 0;
