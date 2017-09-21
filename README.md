@@ -12,6 +12,9 @@
 - [Summary](#summary)
 - [Usage](#usage)
 - [Examples](#examples)
+  - [Apple](#apple-example)
+  - [Android](#android-example)
+- [Directory structure](#directory-structure)
 - [License](#license)
 
 ## Summary
@@ -54,7 +57,7 @@ android {
 
 ## Examples
 
-### Apple
+### Apple example
 
 After building the project on macOS, a framework will be generated. Including this in a project will allow you to use your core API from Objective-C and/or Swift.
 
@@ -64,6 +67,21 @@ import Animus
 var api = Api.createApi(AppleEventLoop(), httpClient: AppleHttp(), threadLauncher: AppleThreadLauncher())
 ```
 *macOS Swift Example*
+
+### Android example
+
+*Coming soon*
+
+## Directory structure
+
+```bash
+├── cmake/ # contains animus CMake modules
+├── deps/ # third party dependencies
+├── rc/ # resources folder
+├── src/ # contains hand-written source files in Objective-C, C++, and Java
+├── .travis.yml # defines Travis-CI automated builds and regression tests
+└── CMakeLists.txt # the top-level CMake build file
+```
 
 ## License
 
