@@ -2,14 +2,20 @@
 
 [![FreeBSD License](https://img.shields.io/:license-freebsd-red.svg)](https://github.com/sgerbino/animus/blob/master/LICENSE)
 [![Build Status](https://travis-ci.org/sgerbino/animus.svg?branch=master)](https://travis-ci.org/sgerbino/animus)
-<!--
- [![Build Status](https://ci.appveyor.com/api/projects/status/g719foxpitcnas2s/branch/master?svg=true)](https://ci.appveyor.com/project/sgerbino/table)
- [![Coverity Status](https://scan.coverity.com/projects/7249/badge.svg)](https://scan.coverity.com/projects/sgerbino-table)
--->
+
+Animus is a template CMake project that utilizes Djinni to generate Swift, Objective-C and Java bindings for modern C++. This is particularly useful for developing cross-platform mobile applications with common application logic.
+
+The goal is this project is to provide:
+
+- A core library template that can be used in the most native way for the IDE at hand
+  - In Xcode, we build a framework with a modulemap included; This allows us to use the libraries created with a simple `import' statement, rather than requiring a bridging header
+  - In Android Studio, we ensure that the CMake file can be consumed by Android Studio's gradle file out-of-the-box
+- Support for out of source builds by default
+- A modern CMake and C++ cross-platform implementation
 
 ## Table of contents
 
-- [Summary](#summary)
+- [Quick start](#quick-start)
 - [Usage](#usage)
 - [Examples](#examples)
   - [Apple](#apple-example)
@@ -17,9 +23,7 @@
 - [Directory structure](#directory-structure)
 - [License](#license)
 
-## Summary
-
-Animus is a template CMake project that utilizes Djinni to generate Swift, Objective-C and Java bindings for modern C++. This is particularly useful for developing cross-platform mobile applications with common application logic.
+## Quick start
 
 ```bash
 git clone https://github.com/sgerbino/animus.git
