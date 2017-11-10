@@ -29,6 +29,12 @@ macro(animus_add_objc)
          XCODE_ATTRIBUTE_DEFINES_MODULE YES
          PROJECT_LABEL "Objective-C/C++"
          OUTPUT_NAME ${ANIMUS_PROJECT_NAME})
+
+      install(TARGETS ${ANIMUS_OBJC_LIBRARY}
+           RUNTIME DESTINATION bin
+           LIBRARY DESTINATION lib
+           ARCHIVE DESTINATION lib/static
+           FRAMEWORK DESTINATION Frameworks)
    endif()
 endmacro()
 
