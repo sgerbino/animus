@@ -1,7 +1,7 @@
 #include "api.hpp"
 #include "event_loop.hpp"
 #include "thread_launcher.hpp"
-#include "json.hpp"
+#include "nlohmann/json.hpp"
 #include <iostream>
 
 using namespace animus;
