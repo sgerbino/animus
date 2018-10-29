@@ -16,8 +16,8 @@ macro(animus_setup_djinni_command)
    list(APPEND DJINNI_COMMAND
       --objcpp-include-cpp-prefix interface/
       --jni-include-cpp-prefix interface/
-      --cpp-optional-header "\"<experimental/optional>\""
-      --cpp-optional-template std::experimental::optional
+      --cpp-optional-header "\"<optional>\""
+      --cpp-optional-template std::optional
       --cpp-namespace ${ANIMUS_CPP_NAMESPACE}
       --java-package ${ANIMUS_JAVA_PACKAGE}
       --jni-namespace ${ANIMUS_JNI_NAMESPACE}
