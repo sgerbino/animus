@@ -6,7 +6,7 @@ macro(animus_bootstrap)
       set(CMAKE_BUILD_TYPE Debug)
    endif(NOT CMAKE_BUILD_TYPE)
 
-   set(CMAKE_CXX_STANDARD 14)
+   set(CMAKE_CXX_STANDARD 17)
    set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
    string(TOLOWER ${PROJECT_NAME} ANIMUS_BINARY_NAME)
