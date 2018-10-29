@@ -79,7 +79,6 @@ var api = Api.createApi(AppleEventLoop(), httpClient: AppleHttp(), threadLaunche
 ## Directory structure
 
 ```bash
-├── cmake/ # contains animus CMake modules
 ├── deps/ # third party dependencies
 ├── rc/ # resources folder
 ├── src/ # contains hand-written source files in Objective-C, C++, and Java
